@@ -414,6 +414,9 @@
     </footer>
 
     <script>
+        // ===== CONFIGURATION =====
+        const API_BASE_URL = 'https://hgcye8yz18.execute-api.eu-west-1.amazonaws.com/v1/audio';
+
         // Navbar scroll effect
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
@@ -430,39 +433,89 @@
             link.addEventListener('click', () => navLinks.classList.remove('open'));
         });
 
-        // ===== LATEST 3 TRACKS =====
+        // ===== FETCH SIGNED URL =====
+        async function getSignedUrl(trackId, type = 'preview') {
+            const url = `${API_BASE_URL}/${trackId}?type=${type}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Failed to get signed URL: ${response.statusText}`);
+            }
+            const data = await response.json();
+            return data.url;
+        }
+
+        // ===== HERO VIDEO =====
+        (async function initHeroVideo() {
+            try {
+                const videoUrl = await getSignedUrl('hero-video', 'rent');
+                const videoEl = document.querySelector('.hero-bg video source');
+                if (videoEl) {
+                    videoEl.src = videoUrl;
+                    videoEl.parentElement.load();
+                }
+            } catch (err) {
+                console.warn('Could not load hero video:', err);
+            }
+        })();
+
+        // ===== LATEST TRACKS =====
         const LATEST_TRACKS = [
             {
+                id: 'track-1',
                 title: 'Session Dobrichlapci — Track 1',
-                duration: '5:42',
-                file: 'tracks/session Dobrichlapci - edit - Track 1 - Mac-9-5.wav'
+                duration: '5:42'
             },
             {
+                id: 'track-2',
                 title: 'Session Dobrichlapci — Track 2',
-                duration: '4:18',
-                file: 'tracks/session Dobrichlapci - edit - Track 2 - Mac-9-5.wav'
+                duration: '4:18'
             },
             {
+                id: 'track-3',
                 title: 'Session Dobrichlapci — Track 3',
-                duration: '5:01',
-                file: 'tracks/session Dobrichlapci - edit - Track 3 - Mac-9-5.wav'
+                duration: '5:01'
+            },
+            {
+                id: 'track-8',
+                title: 'Okupe',
+                duration: '4:05'
             }
         ];
 
         const latestContainer = document.getElementById('latestTracks');
 
+        // Render track cards with placeholder audio elements
         latestContainer.innerHTML = LATEST_TRACKS.map(track => `
-            <div class="track-card">
+            <div class="track-card" data-track-id="${track.id}">
                 <div class="track-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
                 </div>
                 <h3>${track.title}</h3>
                 <div class="track-meta">${track.duration}</div>
                 <audio controls preload="none" style="width: 100%; border-radius: 8px;">
-                    <source src="${track.file}" type="audio/mpeg">
+                    <source src="" type="audio/mpeg">
                 </audio>
             </div>
         `).join('');
+
+        // Load signed URLs for each track's audio element
+        (async function loadTrackUrls() {
+            for (const track of LATEST_TRACKS) {
+                try {
+                    const signedUrl = await getSignedUrl(track.id, 'preview');
+                    const card = document.querySelector(`.track-card[data-track-id="${track.id}"]`);
+                    if (card) {
+                        const source = card.querySelector('audio source');
+                        if (source) {
+                            source.src = signedUrl;
+                            card.querySelector('audio').load();
+                        }
+                    }
+                } catch (err) {
+                    console.warn(`Could not load URL for ${track.id}:`, err);
+                }
+            }
+        })();
     </script>
 </body>
 </html>

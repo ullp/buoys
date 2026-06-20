@@ -740,7 +740,7 @@
     <div class="preview-bar" id="previewBar">
         <div class="preview-label">Preview</div>
         <div class="track-info">
-            <img src="band-logo.jpg" alt="" class="track-art-sm" id="previewArt">
+            <img src="images/band-logo.jpg" alt="" class="track-art-sm" id="previewArt">
             <div>
                 <div class="track-name-cell" id="previewName">Track Name</div>
                 <div class="track-artist-cell">Buoys</div>
@@ -814,6 +814,7 @@
         // ===== CONFIGURATION =====
         // Replace with your actual Stripe publishable key
         const STRIPE_PUBLISHABLE_KEY = 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXX';
+        const API_BASE_URL = 'https://hgcye8yz18.execute-api.eu-west-1.amazonaws.com/v1/audio';
         const RENT_PRICE = 1.99;   // €1.99 per track to rent
         const BUY_PRICE = 4.99;    // €4.99 per track to buy
         const PREVIEW_DURATION = 20; // seconds
@@ -824,7 +825,6 @@
                 id: 'track-1',
                 title: 'Session Dobrichlapci — Track 1',
                 artist: 'Buoys',
-                file: 'tracks/session Dobrichlapci - edit - Track 1 - Mac-9-5.wav',
                 duration: '5:42',
                 durationSec: 342
             },
@@ -832,7 +832,6 @@
                 id: 'track-2',
                 title: 'Session Dobrichlapci — Track 2',
                 artist: 'Buoys',
-                file: 'tracks/session Dobrichlapci - edit - Track 2 - Mac-9-5.wav',
                 duration: '4:18',
                 durationSec: 258
             },
@@ -840,7 +839,6 @@
                 id: 'track-3',
                 title: 'Session Dobrichlapci — Track 3',
                 artist: 'Buoys',
-                file: 'tracks/session Dobrichlapci - edit - Track 3 - Mac-9-5.wav',
                 duration: '5:01',
                 durationSec: 301
             },
@@ -848,7 +846,6 @@
                 id: 'track-4',
                 title: 'Session Dobrichlapci — Track 4',
                 artist: 'Buoys',
-                file: 'tracks/session Dobrichlapci - edit - Track 4 - Mac-9-5.wav',
                 duration: '6:33',
                 durationSec: 393
             },
@@ -856,25 +853,29 @@
                 id: 'track-5',
                 title: 'Session Dobrichlapci — Track 5',
                 artist: 'Buoys',
-                file: 'tracks/session Dobrichlapci - edit - Track 5 - MAC-9-5.wav',
                 duration: '4:45',
                 durationSec: 285
             },
             {
                 id: 'track-6',
-                title: 'Speedstop 09.05.2023',
+                title: 'Session Dobrichlapci — Track 6',
                 artist: 'Buoys',
-                file: 'tracks/Speedstop 09.05.2023.mp3',
+                duration: '4:12',
+                durationSec: 252
+            },
+            {
+                id: 'track-7',
+                title: 'Speedstop',
+                artist: 'Buoys',
                 duration: '7:20',
                 durationSec: 440
             },
             {
-                id: 'track-7',
-                title: '0001 3-Audio-1',
+                id: 'track-8',
+                title: 'Okupe',
                 artist: 'Buoys',
-                file: 'tracks/0001 3-Audio-1.wav',
-                duration: '3:30',
-                durationSec: 210
+                duration: '4:05',
+                durationSec: 245
             }
         ];
 
@@ -943,7 +944,7 @@
                         <td class="track-number">${idx + 1}</td>
                         <td>
                             <div class="track-info-cell">
-                                <img src="band-logo.jpg" alt="" class="track-art-sm">
+                                <img src="images/band-logo.jpg" alt="" class="track-art-sm">
                                 <div>
                                     <div class="track-name-cell">${track.title}</div>
                                     <div class="track-artist-cell">${track.artist}</div>
@@ -982,6 +983,17 @@
             });
         }
 
+        // ===== FETCH SIGNED URL =====
+        async function getSignedUrl(trackId, type = 'preview') {
+            const url = `${API_BASE_URL}/${trackId}?type=${type}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Failed to get signed URL: ${response.statusText}`);
+            }
+            const data = await response.json();
+            return data.url;
+        }
+
         // ===== PREVIEW (20s) =====
         async function handlePlay(trackId) {
             const track = TRACKS.find(t => t.id === trackId);
@@ -1002,14 +1014,15 @@
 
             previewTrackId = trackId;
             previewName.textContent = track.title;
-            previewArt.src = 'band-logo.jpg';
+            previewArt.src = 'images/band-logo.jpg';
             previewBar.classList.add('active');
 
             // Update play button state
             updatePlayButtons(trackId);
 
             try {
-                const response = await fetch(track.file);
+                const signedUrl = await getSignedUrl(trackId, 'preview');
+                const response = await fetch(signedUrl);
                 const arrayBuffer = await response.arrayBuffer();
 
                 if (!audioContext) {
@@ -1198,7 +1211,7 @@
                     total += item.price;
                     html += `
                         <div class="cart-item" data-cart-idx="${idx}">
-                            <img src="band-logo.jpg" alt="" class="track-art-sm">
+                            <img src="images/band-logo.jpg" alt="" class="track-art-sm">
                             <div class="item-info">
                                 <div class="item-name">${item.title}</div>
                                 <div class="item-type">Purchase</div>
@@ -1362,41 +1375,52 @@
             downloadHtml += '<h3 style="margin-bottom:12px; color:#1db954;">Purchase Complete!</h3>';
             downloadHtml += '<p style="color:#aaa; margin-bottom:20px;">Your tracks are ready to download.</p>';
 
-            purchasedTracks.forEach(track => {
-                const fileName = track.file.split('/').pop();
-                downloadHtml += `
-                    <a href="${track.file}" download="${fileName}" class="btn btn-success btn-sm" style="margin:4px; text-decoration:none;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Download ${track.title}
-                    </a>
-                `;
+            // Fetch signed URLs for each purchased track and generate download links
+            const downloadPromises = purchasedTracks.map(async (track) => {
+                try {
+                    const signedUrl = await getSignedUrl(track.id, 'buy');
+                    const fileName = `${track.id}.wav`;
+                    return `
+                        <a href="${signedUrl}" download="${fileName}" class="btn btn-success btn-sm" style="margin:4px; text-decoration:none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download ${track.title}
+                        </a>
+                    `;
+                } catch (err) {
+                    console.warn(`Could not get download URL for ${track.id}:`, err);
+                    return `<p style="color:#e74c3c; font-size:0.85rem;">Failed to get download link for ${track.title}</p>`;
+                }
             });
 
-            downloadHtml += '</div>';
+            // Wait for all signed URLs and render
+            Promise.all(downloadPromises).then(links => {
+                downloadHtml += links.join('');
+                downloadHtml += '</div>';
 
-            // Show success in checkout modal
-            paymentElement.innerHTML = downloadHtml;
-            paymentForm.querySelector('.checkout-actions').style.display = 'none';
-            paymentMessage.textContent = '';
-            paymentMessage.className = '';
+                // Show success in checkout modal
+                paymentElement.innerHTML = downloadHtml;
+                paymentForm.querySelector('.checkout-actions').style.display = 'none';
+                paymentMessage.textContent = '';
+                paymentMessage.className = '';
 
-            // Clear cart
-            cart = [];
-            renderTracks();
-            updateCartUI();
+                // Clear cart
+                cart = [];
+                renderTracks();
+                updateCartUI();
 
-            showToast('Purchase successful! Tracks downloaded.', 'success');
-            setLoading(false);
+                showToast('Purchase successful! Tracks downloaded.', 'success');
+                setLoading(false);
 
-            // Close checkout after a delay
-            setTimeout(() => {
-                checkoutModal.classList.remove('active');
-                // Reset form
+                // Close checkout after a delay
                 setTimeout(() => {
-                    paymentElement.innerHTML = '<div id="payment-element"></div>';
-                    paymentForm.querySelector('.checkout-actions').style.display = 'flex';
-                }, 300);
-            }, 5000);
+                    checkoutModal.classList.remove('active');
+                    // Reset form
+                    setTimeout(() => {
+                        paymentElement.innerHTML = '<div id="payment-element"></div>';
+                        paymentForm.querySelector('.checkout-actions').style.display = 'flex';
+                    }, 300);
+                }, 5000);
+            });
         }
 
         checkoutCancel.addEventListener('click', () => {
