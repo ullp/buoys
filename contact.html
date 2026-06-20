@@ -211,12 +211,6 @@
             color: #888;
             font-size: 0.85rem;
         }
-        .service-card .service-info .service-price {
-            color: #1db954;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
 
         /* ===== CONTACT FORM ===== */
         .contact-form-wrapper {
@@ -455,6 +449,14 @@
                                         <span style="color: #666; font-size: 0.85rem;">None selected</span>
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <label for="formCaptcha">Security Check *</label>
+                                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                        <span id="captchaQuestion" style="background: #1e1e1e; padding: 12px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); font-weight: 600; min-width: 120px; text-align: center; user-select: none;"></span>
+                                        <input type="number" id="formCaptcha" name="captcha" placeholder="Your answer" required style="flex: 1; min-width: 100px;">
+                                    </div>
+                                    <p style="font-size: 0.75rem; color: #666; margin-top: 6px;">Please solve the math problem above to verify you're human.</p>
+                                </div>
                                 <button type="submit" class="btn btn-primary form-submit" id="formSubmitBtn">
                                     Send Inquiry
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -484,7 +486,6 @@
                                 <div class="service-info">
                                     <h3>Play Live at a Club</h3>
                                     <p>We bring our full live electronic jamming set to your club. Raw, improvised, and energetic.</p>
-                                    <div class="service-price">from €500</div>
                                 </div>
                             </label>
                         </div>
@@ -495,7 +496,6 @@
                                 <div class="service-info">
                                     <h3>Play at an Event</h3>
                                     <p>Festivals, private events, corporate functions — we adapt our set to any vibe.</p>
-                                    <div class="service-price">from €800</div>
                                 </div>
                             </label>
                         </div>
@@ -506,7 +506,6 @@
                                 <div class="service-info">
                                     <h3>Collaborate / Play with More Bands</h3>
                                     <p>We're open to jamming with other musicians, co-headlining shows, or collaborative projects.</p>
-                                    <div class="service-price">from €350</div>
                                 </div>
                             </label>
                         </div>
@@ -517,7 +516,6 @@
                                 <div class="service-info">
                                     <h3>Studio Session / Recording</h3>
                                     <p>Book us for a studio recording session or collaborative writing camp.</p>
-                                    <div class="service-price">from €200</div>
                                 </div>
                             </label>
                         </div>
@@ -583,6 +581,35 @@
                 return `<span style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.1);">${label}</span>`;
             }).join('');
         }
+
+        // ===== CAPTCHA: GENERATE MATH PROBLEM =====
+        let captchaAnswer = 0;
+        function generateCaptcha() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            const ops = ['+', '-', '×'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            const questionEl = document.getElementById('captchaQuestion');
+            const inputEl = document.getElementById('formCaptcha');
+            if (op === '+') captchaAnswer = a + b;
+            else if (op === '-') captchaAnswer = a - b;
+            else captchaAnswer = a * b;
+            questionEl.textContent = `${a} ${op} ${b} = ?`;
+            inputEl.value = '';
+        }
+        generateCaptcha();
+
+        // ===== FORM SUBMIT: VALIDATE CAPTCHA =====
+        const contactForm = document.getElementById('contactForm');
+        contactForm.addEventListener('submit', function(e) {
+            const userAnswer = parseInt(document.getElementById('formCaptcha').value, 10);
+            if (isNaN(userAnswer) || userAnswer !== captchaAnswer) {
+                e.preventDefault();
+                alert('Incorrect answer. Please solve the math problem correctly.');
+                generateCaptcha();
+                document.getElementById('formCaptcha').focus();
+            }
+        });
 
         // ===== SHOW SUCCESS AFTER FORM SUBMIT REDIRECT =====
         if (window.location.search.includes('sent=1')) {
