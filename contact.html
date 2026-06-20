@@ -418,6 +418,59 @@
     <section class="contact-section">
         <div class="container">
             <div class="contact-grid">
+                <!-- Contact Form -->
+                <div>
+                    <div class="contact-form-wrapper" id="contactFormWrapper">
+                        <div id="formContainer">
+                            <p class="section-label">Inquiry</p>
+                            <h2 class="section-title" style="font-size: clamp(1.5rem, 3vw, 2rem);">Send a Message</h2>
+                            <p class="section-subtitle" style="font-size: 0.9rem; margin-bottom: 32px; max-width: 100%;">Fill out the form below and we'll respond as soon as possible.</p>
+
+                            <form id="contactForm" action="https://formsubmit.co/ullmann.web@gmail.com" method="POST">
+                                <input type="hidden" name="_subject" value="New inquiry - buoys.online">
+                                <input type="hidden" name="_template" value="table">
+                                <input type="hidden" name="_next" value="https://buoys.online/contact.html?sent=1">
+                                <input type="text" name="_honey" style="display:none">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="formName">Name *</label>
+                                        <input type="text" id="formName" name="name" placeholder="Your name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="formEmail">Email *</label>
+                                        <input type="email" id="formEmail" name="email" placeholder="your@email.com" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="formPhone">Phone (optional)</label>
+                                    <input type="tel" id="formPhone" name="phone" placeholder="+420 123 456 789">
+                                </div>
+                                <div class="form-group">
+                                    <label for="formMessage">Message *</label>
+                                    <textarea id="formMessage" name="message" placeholder="Tell us about your event, venue, or idea…" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Selected Services:</label>
+                                    <div id="selectedServices" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; padding: 4px 0;">
+                                        <span style="color: #666; font-size: 0.85rem;">None selected</span>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary form-submit" id="formSubmitBtn">
+                                    Send Inquiry
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="form-success" id="formSuccess">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <h3>Message Sent!</h3>
+                            <p>Thank you for reaching out. We'll get back to you within 48 hours.</p>
+                            <button class="btn btn-outline" style="margin-top: 20px;" onclick="resetForm()">Send Another Message</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Service Options -->
                 <div>
                     <p class="section-label">Services</p>
@@ -467,66 +520,6 @@
                                     <div class="service-price">from €200</div>
                                 </div>
                             </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contact Form -->
-                <div>
-                    <div class="contact-form-wrapper" id="contactFormWrapper">
-                        <div id="formContainer">
-                            <p class="section-label">Inquiry</p>
-                            <h2 class="section-title" style="font-size: clamp(1.5rem, 3vw, 2rem);">Send a Message</h2>
-                            <p class="section-subtitle" style="font-size: 0.9rem; margin-bottom: 32px; max-width: 100%;">Fill out the form below and we'll respond as soon as possible.</p>
-
-                            <form id="contactForm" action="#" method="POST">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="formName">Name *</label>
-                                        <input type="text" id="formName" name="name" placeholder="Your name" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="formEmail">Email *</label>
-                                        <input type="email" id="formEmail" name="email" placeholder="your@email.com" required>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="formPhone">Phone (optional)</label>
-                                    <input type="tel" id="formPhone" name="phone" placeholder="+420 123 456 789">
-                                </div>
-                                <div class="form-group">
-                                    <label for="formSubject">Subject *</label>
-                                    <select id="formSubject" name="subject" required>
-                                        <option value="">Select a subject…</option>
-                                        <option value="club">Book for Club Performance</option>
-                                        <option value="event">Book for Event / Festival</option>
-                                        <option value="collab">Collaboration Proposal</option>
-                                        <option value="studio">Studio Session Inquiry</option>
-                                        <option value="general">General Inquiry</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="formMessage">Message *</label>
-                                    <textarea id="formMessage" name="message" placeholder="Tell us about your event, venue, or idea…" required></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <label>Selected Services:</label>
-                                    <div id="selectedServices" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; padding: 4px 0;">
-                                        <span style="color: #666; font-size: 0.85rem;">None selected</span>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary form-submit" id="formSubmitBtn">
-                                    Send Inquiry
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                                </button>
-                            </form>
-                        </div>
-
-                        <div class="form-success" id="formSuccess">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            <h3>Message Sent!</h3>
-                            <p>Thank you for reaching out. We'll get back to you within 48 hours.</p>
-                            <button class="btn btn-outline" style="margin-top: 20px;" onclick="resetForm()">Send Another Message</button>
                         </div>
                     </div>
                 </div>
@@ -591,41 +584,18 @@
             }).join('');
         }
 
-        // ===== FORM SUBMISSION =====
-        const contactForm = document.getElementById('contactForm');
-        const formContainer = document.getElementById('formContainer');
-        const formSuccess = document.getElementById('formSuccess');
-
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Collect selected services
-            const checkedServices = Array.from(serviceCheckboxes)
-                .filter(cb => cb.checked)
-                .map(cb => cb.closest('.service-card').querySelector('h3').textContent);
-
-            // Build form data
-            const formData = {
-                name: document.getElementById('formName').value,
-                email: document.getElementById('formEmail').value,
-                phone: document.getElementById('formPhone').value,
-                subject: document.getElementById('formSubject').value,
-                message: document.getElementById('formMessage').value,
-                services: checkedServices
-            };
-
-            console.log('Form submitted:', formData);
-
-            // Show success state
-            formContainer.style.display = 'none';
-            formSuccess.classList.add('active');
-        });
+        // ===== SHOW SUCCESS AFTER FORM SUBMIT REDIRECT =====
+        if (window.location.search.includes('sent=1')) {
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('formSuccess').classList.add('active');
+        }
 
         function resetForm() {
             contactForm.reset();
             updateSelectedServices();
-            formContainer.style.display = 'block';
-            formSuccess.classList.remove('active');
+            document.getElementById('formContainer').style.display = 'block';
+            document.getElementById('formSuccess').classList.remove('active');
+            window.history.replaceState({}, document.title, 'https://buoys.online/contact.html');
         }
     </script>
 </body>
