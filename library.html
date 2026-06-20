@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library — Buoys</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-y: scroll; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #f0f0f0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
+        ul { list-style: none; }
+
+        /* ===== UTILITY ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .section-label {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 600px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: #fff;
+            color: #0a0a0a;
+        }
+        .btn-primary:hover {
+            background: #ddd;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1.5px solid rgba(255,255,255,0.3);
+        }
+        .btn-outline:hover {
+            border-color: #fff;
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-2px);
+        }
+        .btn-sm {
+            padding: 8px 18px;
+            font-size: 0.8rem;
+        }
+        .btn-success {
+            background: #1db954;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #169c46;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        .btn-cart {
+            background: #f0f0f0;
+            color: #0a0a0a;
+            position: relative;
+        }
+        .btn-cart:hover {
+            background: #fff;
+            transform: translateY(-2px);
+        }
+        .btn-cart .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #e74c3c;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            transition: background 0.4s ease, padding 0.4s ease;
+            background: rgba(10,10,10,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        .nav-links a {
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #aaa;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active { color: #fff; }
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+        .nav-toggle span {
+            display: block;
+            width: 26px;
+            height: 2px;
+            background: #fff;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        /* ===== LIBRARY HERO ===== */
+        .library-hero {
+            padding: 160px 0 80px;
+            background: linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%);
+            text-align: center;
+        }
+        .library-hero .section-subtitle {
+            margin: 0 auto;
+        }
+
+        /* ===== TRACK LIST ===== */
+        .library-section {
+            padding: 0 0 120px;
+        }
+        .track-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .track-table thead th {
+            text-align: left;
+            padding: 16px 12px;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #666;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-weight: 600;
+        }
+        .track-table tbody tr {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.2s;
+        }
+        .track-table tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        .track-table tbody td {
+            padding: 16px 12px;
+            vertical-align: middle;
+        }
+        .track-number {
+            color: #555;
+            font-size: 0.9rem;
+            font-weight: 600;
+            width: 40px;
+        }
+        .track-info-cell {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .track-art-sm {
+            width: 44px;
+            height: 44px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #1a1a1a;
+        }
+        .track-name-cell {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .track-artist-cell {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        .track-duration {
+            color: #666;
+            font-size: 0.85rem;
+            width: 60px;
+        }
+        .track-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .track-actions .btn {
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            border-radius: 30px;
+        }
+        .btn-play {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-play:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+        .btn-play.playing {
+            background: #1db954;
+            border-color: #1db954;
+        }
+        .btn-rent {
+            background: rgba(29,185,84,0.15);
+            color: #1db954;
+            border: 1px solid rgba(29,185,84,0.3);
+        }
+        .btn-rent:hover {
+            background: rgba(29,185,84,0.25);
+            transform: translateY(-1px);
+        }
+        .btn-rent.rented {
+            background: #1db954;
+            color: #fff;
+            border-color: #1db954;
+        }
+        .btn-buy {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-buy:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+        .btn-buy.in-cart {
+            background: #f39c12;
+            color: #fff;
+            border-color: #f39c12;
+        }
+        .track-price {
+            color: #aaa;
+            font-size: 0.85rem;
+            font-weight: 600;
+            width: 70px;
+            text-align: right;
+        }
+
+        /* ===== PREVIEW BAR ===== */
+        .preview-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: rgba(20,20,20,0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 24px;
+            display: none;
+            align-items: center;
+            gap: 20px;
+        }
+        .preview-bar.active { display: flex; }
+        .preview-bar .track-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 180px;
+        }
+        .preview-bar .track-art-sm {
+            width: 36px;
+            height: 36px;
+        }
+        .preview-bar .track-name-cell {
+            font-size: 0.85rem;
+        }
+        .preview-bar .track-artist-cell {
+            font-size: 0.75rem;
+        }
+        .preview-bar .preview-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        .preview-bar .preview-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.1);
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .preview-bar .preview-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .preview-bar .preview-timeline {
+            flex: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        .preview-bar .preview-timeline .fill {
+            height: 100%;
+            background: #1db954;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        .preview-bar .preview-timeline .limit-marker {
+            position: absolute;
+            top: -4px;
+            bottom: -4px;
+            width: 2px;
+            background: rgba(255,255,255,0.3);
+            z-index: 1;
+        }
+        .preview-bar .preview-time {
+            font-size: 0.75rem;
+            color: #888;
+            font-variant-numeric: tabular-nums;
+            min-width: 80px;
+            text-align: right;
+        }
+        .preview-bar .preview-label {
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #1db954;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* ===== CART SIDEBAR ===== */
+        .cart-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0,0,0,0.6);
+        }
+        .cart-overlay.active { display: block; }
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 400px;
+            max-width: 100vw;
+            height: 100vh;
+            z-index: 2001;
+            background: #111;
+            border-left: 1px solid rgba(255,255,255,0.06);
+            transition: right 0.4s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .cart-header h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .cart-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .cart-close:hover { color: #fff; }
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 24px;
+        }
+        .cart-empty {
+            text-align: center;
+            color: #666;
+            padding: 60px 0;
+        }
+        .cart-empty svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .cart-item .track-art-sm {
+            width: 36px;
+            height: 36px;
+        }
+        .cart-item .item-info {
+            flex: 1;
+        }
+        .cart-item .item-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .cart-item .item-type {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .cart-item .item-price {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1db954;
+        }
+        .cart-item .item-remove {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            padding: 4px;
+        }
+        .cart-item .item-remove:hover { color: #e74c3c; }
+        .cart-footer {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+        }
+        .cart-total .total-amount {
+            font-weight: 800;
+            font-size: 1.3rem;
+        }
+        .cart-footer .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ===== CHECKOUT MODAL ===== */
+        .checkout-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 3000;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .checkout-modal.active { display: flex; }
+        .checkout-content {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.06);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .checkout-content h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .checkout-content .checkout-sub {
+            color: #888;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+        }
+        .checkout-summary {
+            background: #141414;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .checkout-summary .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.85rem;
+        }
+        .checkout-summary .summary-row.total {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin-top: 8px;
+            padding-top: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        #payment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #payment-element {
+            background: #141414;
+            border-radius: 10px;
+            padding: 16px;
+        }
+        #payment-message {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        #payment-message.success {
+            color: #1db954;
+        }
+        .checkout-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .checkout-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            z-index: 5000;
+            background: #1a1a1a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.success { border-color: #1db954; }
+        .toast.error { border-color: #e74c3c; }
+        .toast.info { border-color: #3498db; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .track-table thead th:nth-child(4),
+            .track-table tbody td:nth-child(4) { display: none; }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: #111;
+                flex-direction: column;
+                padding: 80px 40px 40px;
+                gap: 24px;
+                transition: right 0.4s ease;
+                border-left: 1px solid rgba(255,255,255,0.06);
+            }
+            .nav-links.open { right: 0; }
+            .nav-toggle { display: flex; }
+            .track-table thead th:nth-child(3),
+            .track-table tbody td:nth-child(3) { display: none; }
+            .track-table thead th:nth-child(5),
+            .track-table tbody td:nth-child(5) { display: none; }
+            .track-actions { flex-direction: column; }
+            .cart-sidebar { width: 100vw; }
+            .preview-bar { flex-wrap: wrap; }
+            .preview-bar .track-info { min-width: 120px; }
+            .checkout-content { padding: 24px; }
+        }
+        @media (max-width: 500px) {
+            .library-hero { padding: 140px 0 40px; }
+            .track-table tbody td { padding: 12px 8px; }
+            .track-info-cell { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">BUOYS</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="library.html" class="active">Library</a>
+                <a href="gallery.html">Gallery</a>
+                <a href="contact.html">Contact</a>
+                <button class="btn btn-cart btn-sm" id="cartToggleBtn" style="padding: 10px 20px; font-size: 0.8rem; position: relative;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    Cart
+                    <span class="badge" id="cartBadge" style="display:none;">0</span>
+                </button>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== LIBRARY HERO ===== -->
+    <section class="library-hero">
+        <div class="container">
+            <p class="section-label">Library</p>
+            <h1 class="section-title">Track Library</h1>
+            <p class="section-subtitle">Preview 20 seconds of each track for free. Play online for full streaming access, or buy to download the full track.</p>
+        </div>
+    </section>
+
+    <!-- ===== TRACK LIST ===== -->
+    <section class="library-section">
+        <div class="container">
+            <table class="track-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Track</th>
+                        <th>Duration</th>
+                        <th>Actions</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody id="trackListBody">
+                    <!-- Tracks injected by JS -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ===== PREVIEW BAR ===== -->
+    <div class="preview-bar" id="previewBar">
+        <div class="preview-label">Preview</div>
+        <div class="track-info">
+            <img src="band-logo.jpg" alt="" class="track-art-sm" id="previewArt">
+            <div>
+                <div class="track-name-cell" id="previewName">Track Name</div>
+                <div class="track-artist-cell">Buoys</div>
+            </div>
+        </div>
+        <div class="preview-controls">
+            <button class="preview-btn" id="previewPlayBtn" aria-label="Play/Pause">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <div class="preview-timeline" id="previewTimeline">
+                <div class="fill" id="previewFill"></div>
+                <div class="limit-marker" style="left: 33.33%;"></div>
+            </div>
+            <div class="preview-time" id="previewTime">0:00 / 0:00</div>
+        </div>
+        <button class="btn btn-sm btn-outline" id="previewClose" style="padding: 6px 12px; font-size: 0.7rem;">Close</button>
+    </div>
+
+    <!-- ===== CART OVERLAY ===== -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+
+    <!-- ===== CART SIDEBAR ===== -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Shopping Cart</h3>
+            <button class="cart-close" id="cartClose">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="cart-empty" id="cartEmpty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <p>Your cart is empty</p>
+                <p style="font-size:0.8rem; margin-top:8px;">Browse tracks and click "Buy" to add them here.</p>
+            </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display:none;">
+            <div class="cart-total">
+                <span>Total</span>
+                <span class="total-amount" id="cartTotal">€0.00</span>
+            </div>
+            <button class="btn btn-success" id="checkoutBtn">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== CHECKOUT MODAL ===== -->
+    <div class="checkout-modal" id="checkoutModal">
+        <div class="checkout-content">
+            <h2>Checkout</h2>
+            <p class="checkout-sub">Complete your purchase to download your tracks.</p>
+            <div class="checkout-summary" id="checkoutSummary"></div>
+            <form id="payment-form">
+                <div id="payment-element"></div>
+                <div id="payment-message"></div>
+                <div class="checkout-actions">
+                    <button class="btn btn-outline" type="button" id="checkoutCancel">Cancel</button>
+                    <button class="btn btn-primary" type="submit" id="submitBtn">
+                        <span id="submitBtnText">Pay Now</span>
+                        <span class="spinner" id="submitSpinner" style="display:none;"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        // ===== CONFIGURATION =====
+        // Replace with your actual Stripe publishable key
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXX';
+        const RENT_PRICE = 1.99;   // €1.99 per track to rent
+        const BUY_PRICE = 4.99;    // €4.99 per track to buy
+        const PREVIEW_DURATION = 20; // seconds
+
+        // ===== TRACK DATA =====
+        const TRACKS = [
+            {
+                id: 'track-1',
+                title: 'Session Dobrichlapci — Track 1',
+                artist: 'Buoys',
+                file: 'tracks/session Dobrichlapci - edit - Track 1 - Mac-9-5.wav',
+                duration: '5:42',
+                durationSec: 342
+            },
+            {
+                id: 'track-2',
+                title: 'Session Dobrichlapci — Track 2',
+                artist: 'Buoys',
+                file: 'tracks/session Dobrichlapci - edit - Track 2 - Mac-9-5.wav',
+                duration: '4:18',
+                durationSec: 258
+            },
+            {
+                id: 'track-3',
+                title: 'Session Dobrichlapci — Track 3',
+                artist: 'Buoys',
+                file: 'tracks/session Dobrichlapci - edit - Track 3 - Mac-9-5.wav',
+                duration: '5:01',
+                durationSec: 301
+            },
+            {
+                id: 'track-4',
+                title: 'Session Dobrichlapci — Track 4',
+                artist: 'Buoys',
+                file: 'tracks/session Dobrichlapci - edit - Track 4 - Mac-9-5.wav',
+                duration: '6:33',
+                durationSec: 393
+            },
+            {
+                id: 'track-5',
+                title: 'Session Dobrichlapci — Track 5',
+                artist: 'Buoys',
+                file: 'tracks/session Dobrichlapci - edit - Track 5 - MAC-9-5.wav',
+                duration: '4:45',
+                durationSec: 285
+            },
+            {
+                id: 'track-6',
+                title: 'Speedstop 09.05.2023',
+                artist: 'Buoys',
+                file: 'tracks/Speedstop 09.05.2023.mp3',
+                duration: '7:20',
+                durationSec: 440
+            },
+            {
+                id: 'track-7',
+                title: '0001 3-Audio-1',
+                artist: 'Buoys',
+                file: 'tracks/0001 3-Audio-1.wav',
+                duration: '3:30',
+                durationSec: 210
+            }
+        ];
+
+        // ===== STATE =====
+        let cart = [];
+        let rentedTracks = new Set();
+        let currentlyPlaying = null; // track id
+        let audioContext = null;
+        let audioBuffer = null;
+        let sourceNode = null;
+        let gainNode = null;
+        let isPlaying = false;
+        let startTime = 0;
+        let pausedAt = 0;
+        let previewTrackId = null;
+        let animationFrame = null;
+        let stripe = null;
+        let elements = null;
+        let paymentIntentClientSecret = null;
+
+        // ===== DOM REFS =====
+        const trackListBody = document.getElementById('trackListBody');
+        const previewBar = document.getElementById('previewBar');
+        const previewArt = document.getElementById('previewArt');
+        const previewName = document.getElementById('previewName');
+        const previewPlayBtn = document.getElementById('previewPlayBtn');
+        const previewFill = document.getElementById('previewFill');
+        const previewTime = document.getElementById('previewTime');
+        const previewClose = document.getElementById('previewClose');
+        const previewTimeline = document.getElementById('previewTimeline');
+        const cartToggleBtn = document.getElementById('cartToggleBtn');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const cartClose = document.getElementById('cartClose');
+        const cartItems = document.getElementById('cartItems');
+        const cartEmpty = document.getElementById('cartEmpty');
+        const cartFooter = document.getElementById('cartFooter');
+        const cartTotal = document.getElementById('cartTotal');
+        const cartBadge = document.getElementById('cartBadge');
+        const checkoutModal = document.getElementById('checkoutModal');
+        const checkoutSummary = document.getElementById('checkoutSummary');
+        const checkoutCancel = document.getElementById('checkoutCancel');
+        const paymentForm = document.getElementById('payment-form');
+        const paymentElement = document.getElementById('payment-element');
+        const paymentMessage = document.getElementById('payment-message');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const submitSpinner = document.getElementById('submitSpinner');
+        const toast = document.getElementById('toast');
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        // ===== NAV TOGGLE =====
+        navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinks.classList.remove('open'));
+        });
+
+        // ===== RENDER TRACKS =====
+        function renderTracks() {
+            trackListBody.innerHTML = TRACKS.map((track, idx) => {
+                const isRented = rentedTracks.has(track.id);
+                const inCart = cart.some(item => item.trackId === track.id && item.type === 'buy');
+                return `
+                    <tr data-track-id="${track.id}">
+                        <td class="track-number">${idx + 1}</td>
+                        <td>
+                            <div class="track-info-cell">
+                                <img src="band-logo.jpg" alt="" class="track-art-sm">
+                                <div>
+                                    <div class="track-name-cell">${track.title}</div>
+                                    <div class="track-artist-cell">${track.artist}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="track-duration">${track.duration}</td>
+                        <td>
+                            <div class="track-actions">
+                                <button class="btn btn-play btn-sm" data-action="play" data-track-id="${track.id}">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    Preview
+                                </button>
+                                <button class="btn btn-rent btn-sm ${isRented ? 'rented' : ''}" data-action="rent" data-track-id="${track.id}">
+                                    ${isRented ? '✓ Playing' : 'Play online for €' + RENT_PRICE.toFixed(2)}
+                                </button>
+                                <button class="btn btn-buy btn-sm ${inCart ? 'in-cart' : ''}" data-action="buy" data-track-id="${track.id}">
+                                    ${inCart ? '✓ In Cart' : 'Buy €' + BUY_PRICE.toFixed(2)}
+                                </button>
+                            </div>
+                        </td>
+                        <td class="track-price">€${BUY_PRICE.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Attach event listeners
+            document.querySelectorAll('[data-action="play"]').forEach(btn => {
+                btn.addEventListener('click', () => handlePlay(btn.dataset.trackId));
+            });
+            document.querySelectorAll('[data-action="rent"]').forEach(btn => {
+                btn.addEventListener('click', () => handleRent(btn.dataset.trackId));
+            });
+            document.querySelectorAll('[data-action="buy"]').forEach(btn => {
+                btn.addEventListener('click', () => handleBuy(btn.dataset.trackId));
+            });
+        }
+
+        // ===== PREVIEW (20s) =====
+        async function handlePlay(trackId) {
+            const track = TRACKS.find(t => t.id === trackId);
+            if (!track) return;
+
+            // If clicking the same track, toggle play/pause
+            if (previewTrackId === trackId && audioBuffer) {
+                if (isPlaying) {
+                    pausePreview();
+                } else {
+                    resumePreview();
+                }
+                return;
+            }
+
+            // Stop any current playback
+            stopPreview();
+
+            previewTrackId = trackId;
+            previewName.textContent = track.title;
+            previewArt.src = 'band-logo.jpg';
+            previewBar.classList.add('active');
+
+            // Update play button state
+            updatePlayButtons(trackId);
+
+            try {
+                const response = await fetch(track.file);
+                const arrayBuffer = await response.arrayBuffer();
+
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                // Create gain node for volume control
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 1.0;
+                gainNode.connect(audioContext.destination);
+
+                startPreview();
+            } catch (err) {
+                console.error('Error loading audio:', err);
+                showToast('Failed to load audio preview.', 'error');
+                previewBar.classList.remove('active');
+                previewTrackId = null;
+            }
+        }
+
+        function startPreview() {
+            if (!audioContext || !audioBuffer) return;
+
+            sourceNode = audioContext.createBufferSource();
+            sourceNode.buffer = audioBuffer;
+            sourceNode.connect(gainNode);
+
+            // Limit to 20 seconds
+            const duration = Math.min(PREVIEW_DURATION, audioBuffer.duration);
+            sourceNode.start(0, pausedAt, duration);
+
+            startTime = audioContext.currentTime - pausedAt;
+            isPlaying = true;
+            updatePlayButtonIcon(true);
+
+            // Schedule stop after 20 seconds
+            const stopTimeout = (duration - pausedAt) * 1000;
+            if (stopTimeout > 0) {
+                setTimeout(() => {
+                    if (isPlaying && previewTrackId) {
+                        pausePreview();
+                        showToast('Preview ended — 20 second limit reached.', 'info');
+                    }
+                }, stopTimeout);
+            }
+
+            updatePreviewProgress();
+        }
+
+        function pausePreview() {
+            if (!isPlaying || !audioContext) return;
+            pausedAt = audioContext.currentTime - startTime;
+            sourceNode.stop();
+            isPlaying = false;
+            updatePlayButtonIcon(false);
+            cancelAnimationFrame(animationFrame);
+        }
+
+        function resumePreview() {
+            if (isPlaying || !audioBuffer) return;
+            startPreview();
+        }
+
+        function stopPreview() {
+            if (sourceNode) {
+                try { sourceNode.stop(); } catch(e) {}
+                sourceNode = null;
+            }
+            isPlaying = false;
+            pausedAt = 0;
+            cancelAnimationFrame(animationFrame);
+            updatePlayButtonIcon(false);
+            previewFill.style.width = '0%';
+            previewTime.textContent = '0:00 / 0:20';
+            updatePlayButtons(null);
+        }
+
+        function updatePreviewProgress() {
+            if (!isPlaying || !audioContext || !previewTrackId) return;
+
+            const elapsed = audioContext.currentTime - startTime;
+            const duration = Math.min(PREVIEW_DURATION, audioBuffer ? audioBuffer.duration : PREVIEW_DURATION);
+            const progress = Math.min(elapsed / duration, 1);
+            previewFill.style.width = (progress * 100) + '%';
+
+            const remaining = Math.max(0, duration - elapsed);
+            const mins = Math.floor(remaining / 60);
+            const secs = Math.floor(remaining % 60);
+            previewTime.textContent = `${Math.floor(elapsed / 60)}:${String(Math.floor(elapsed % 60)).padStart(2, '0')} / 0:20`;
+
+            if (elapsed >= duration) {
+                pausePreview();
+                showToast('Preview ended — 20 second limit reached.', 'info');
+                return;
+            }
+
+            animationFrame = requestAnimationFrame(updatePreviewProgress);
+        }
+
+        function updatePlayButtonIcon(playing) {
+            const icon = playing
+                ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
+                : '<polygon points="5 3 19 12 5 21 5 3"/>';
+            previewPlayBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">${icon}</svg>`;
+        }
+
+        function updatePlayButtons(activeId) {
+            document.querySelectorAll('[data-action="play"]').forEach(btn => {
+                btn.classList.toggle('playing', btn.dataset.trackId === activeId);
+            });
+        }
+
+        // Preview bar controls
+        previewPlayBtn.addEventListener('click', () => {
+            if (!previewTrackId) return;
+            if (isPlaying) pausePreview();
+            else resumePreview();
+        });
+
+        previewClose.addEventListener('click', () => {
+            stopPreview();
+            previewBar.classList.remove('active');
+            previewTrackId = null;
+        });
+
+        // ===== RENT =====
+        function handleRent(trackId) {
+            const track = TRACKS.find(t => t.id === trackId);
+            if (!track) return;
+
+            if (rentedTracks.has(trackId)) {
+                showToast(`"${track.title}" is already available. Enjoy full streaming!`, 'info');
+                return;
+            }
+
+            // Simulate payment for play online (in production, this would go through Stripe)
+            if (confirm(`Play "${track.title}" online for €${RENT_PRICE.toFixed(2)}?\n\nYou'll get full streaming access.`)) {
+                rentedTracks.add(trackId);
+                renderTracks();
+                showToast(`"${track.title}" is now playing! Full streaming unlocked.`, 'success');
+            }
+        }
+
+        // ===== BUY / CART =====
+        function handleBuy(trackId) {
+            const track = TRACKS.find(t => t.id === trackId);
+            if (!track) return;
+
+            const existing = cart.findIndex(item => item.trackId === trackId && item.type === 'buy');
+            if (existing !== -1) {
+                // Remove from cart
+                cart.splice(existing, 1);
+                showToast(`"${track.title}" removed from cart.`, 'info');
+            } else {
+                // Add to cart
+                cart.push({
+                    trackId: track.id,
+                    title: track.title,
+                    type: 'buy',
+                    price: BUY_PRICE
+                });
+                showToast(`"${track.title}" added to cart!`, 'success');
+            }
+            renderTracks();
+            updateCartUI();
+        }
+
+        // ===== CART UI =====
+        function updateCartUI() {
+            const count = cart.length;
+            cartBadge.textContent = count;
+            cartBadge.style.display = count > 0 ? 'flex' : 'none';
+
+            if (count === 0) {
+                cartEmpty.style.display = 'block';
+                cartFooter.style.display = 'none';
+            } else {
+                cartEmpty.style.display = 'none';
+                cartFooter.style.display = 'block';
+
+                let html = '';
+                let total = 0;
+                cart.forEach((item, idx) => {
+                    total += item.price;
+                    html += `
+                        <div class="cart-item" data-cart-idx="${idx}">
+                            <img src="band-logo.jpg" alt="" class="track-art-sm">
+                            <div class="item-info">
+                                <div class="item-name">${item.title}</div>
+                                <div class="item-type">Purchase</div>
+                            </div>
+                            <div class="item-price">€${item.price.toFixed(2)}</div>
+                            <button class="item-remove" data-cart-idx="${idx}">&times;</button>
+                        </div>
+                    `;
+                });
+                cartItems.querySelectorAll('.cart-item').forEach(el => el.remove());
+                // Insert after cartEmpty
+                cartEmpty.insertAdjacentHTML('afterend', html);
+                cartTotal.textContent = `€${total.toFixed(2)}`;
+
+                // Remove buttons
+                document.querySelectorAll('.item-remove').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const idx = parseInt(btn.dataset.cartIdx);
+                        cart.splice(idx, 1);
+                        renderTracks();
+                        updateCartUI();
+                        showToast('Item removed from cart.', 'info');
+                    });
+                });
+            }
+        }
+
+        // Cart toggle
+        function openCart() {
+            cartSidebar.classList.add('open');
+            cartOverlay.classList.add('active');
+        }
+
+        function closeCart() {
+            cartSidebar.classList.remove('open');
+            cartOverlay.classList.remove('active');
+        }
+
+        cartToggleBtn.addEventListener('click', openCart);
+        cartClose.addEventListener('click', closeCart);
+        cartOverlay.addEventListener('click', closeCart);
+
+        // ===== CHECKOUT =====
+        checkoutBtn.addEventListener('click', async () => {
+            if (cart.length === 0) {
+                showToast('Your cart is empty.', 'error');
+                return;
+            }
+
+            // Build summary
+            let summaryHtml = '';
+            let total = 0;
+            cart.forEach(item => {
+                total += item.price;
+                summaryHtml += `
+                    <div class="summary-row">
+                        <span>${item.title}</span>
+                        <span>€${item.price.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            summaryHtml += `
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>€${total.toFixed(2)}</span>
+                </div>
+            `;
+            checkoutSummary.innerHTML = summaryHtml;
+            submitBtnText.textContent = `Pay €${total.toFixed(2)}`;
+
+            closeCart();
+            checkoutModal.classList.add('active');
+
+            // Initialize Stripe
+            try {
+                stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+                // In production, you would create a PaymentIntent on your server
+                // For demo, we'll simulate the payment
+                const response = await fetch('/.netlify/functions/create-payment-intent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: Math.round(total * 100),
+                        currency: 'eur',
+                        items: cart.map(item => ({
+                            trackId: item.trackId,
+                            title: item.title,
+                            price: item.price
+                        }))
+                    })
+                });
+
+                if (!response.ok) {
+                    // Fallback: simulate payment for demo
+                    throw new Error('No payment backend available');
+                }
+
+                const data = await response.json();
+                paymentIntentClientSecret = data.clientSecret;
+
+                elements = stripe.elements({ clientSecret: paymentIntentClientSecret });
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
+
+            } catch (err) {
+                console.warn('Stripe backend not available, using demo mode.');
+                // Demo mode: show a simple form
+                paymentElement.innerHTML = `
+                    <div style="text-align:center; padding:20px; color:#888;">
+                        <p style="margin-bottom:12px; font-weight:600; color:#f0f0f0;">Demo Mode</p>
+                        <p style="font-size:0.85rem;">No payment backend configured.</p>
+                        <p style="font-size:0.85rem;">Click "Pay" to simulate a successful purchase.</p>
+                    </div>
+                `;
+                paymentIntentClientSecret = 'demo';
+            }
+        });
+
+        // Payment form submit
+        paymentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            setLoading(true);
+            paymentMessage.textContent = '';
+            paymentMessage.className = '';
+
+            if (paymentIntentClientSecret === 'demo') {
+                // Demo mode: simulate successful payment
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                completePurchase();
+                return;
+            }
+
+            try {
+                const { error } = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                        return_url: window.location.href + '?payment=success',
+                    },
+                    redirect: 'if_required'
+                });
+
+                if (error) {
+                    showMessage(error.message);
+                    setLoading(false);
+                } else {
+                    completePurchase();
+                }
+            } catch (err) {
+                showMessage('An unexpected error occurred.');
+                setLoading(false);
+            }
+        });
+
+        function completePurchase() {
+            // Generate download links for purchased tracks
+            const purchasedTracks = cart.map(item => TRACKS.find(t => t.id === item.trackId)).filter(Boolean);
+
+            let downloadHtml = '<div style="text-align:center; padding:20px;">';
+            downloadHtml += '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1db954" stroke-width="2" style="margin-bottom:16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+            downloadHtml += '<h3 style="margin-bottom:12px; color:#1db954;">Purchase Complete!</h3>';
+            downloadHtml += '<p style="color:#aaa; margin-bottom:20px;">Your tracks are ready to download.</p>';
+
+            purchasedTracks.forEach(track => {
+                const fileName = track.file.split('/').pop();
+                downloadHtml += `
+                    <a href="${track.file}" download="${fileName}" class="btn btn-success btn-sm" style="margin:4px; text-decoration:none;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download ${track.title}
+                    </a>
+                `;
+            });
+
+            downloadHtml += '</div>';
+
+            // Show success in checkout modal
+            paymentElement.innerHTML = downloadHtml;
+            paymentForm.querySelector('.checkout-actions').style.display = 'none';
+            paymentMessage.textContent = '';
+            paymentMessage.className = '';
+
+            // Clear cart
+            cart = [];
+            renderTracks();
+            updateCartUI();
+
+            showToast('Purchase successful! Tracks downloaded.', 'success');
+            setLoading(false);
+
+            // Close checkout after a delay
+            setTimeout(() => {
+                checkoutModal.classList.remove('active');
+                // Reset form
+                setTimeout(() => {
+                    paymentElement.innerHTML = '<div id="payment-element"></div>';
+                    paymentForm.querySelector('.checkout-actions').style.display = 'flex';
+                }, 300);
+            }, 5000);
+        }
+
+        checkoutCancel.addEventListener('click', () => {
+            checkoutModal.classList.remove('active');
+        });
+
+        // ===== HELPERS =====
+        function showToast(message, type = 'info') {
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            // Clear existing timeout
+            if (window.toastTimeout) clearTimeout(window.toastTimeout);
+            // Force reflow
+            void toast.offsetWidth;
+            toast.classList.add('active');
+            window.toastTimeout = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        function showMessage(message) {
+            paymentMessage.textContent = message;
+            paymentMessage.className = '';
+        }
+
+        function setLoading(loading) {
+            submitBtn.disabled = loading;
+            submitBtnText.style.display = loading ? 'none' : 'inline';
+            submitSpinner.style.display = loading ? 'inline-block' : 'none';
+        }
+
+        // ===== INIT =====
+        renderTracks();
+        updateCartUI();
+
+        // Check for payment success return
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('payment') === 'success') {
+            showToast('Payment successful!', 'success');
+        }
+
+        console.log('🔊 Library loaded. Configure your Stripe publishable key in the script.');
+        console.log('📦 Tracks available:', TRACKS.length);
+    </script>
+</body>
+</html>

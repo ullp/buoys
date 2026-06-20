@@ -1,0 +1,15 @@
+# Large binary files - audio, video
+tracks/
+*.wav
+*.mp3
+*.mp4
+*.asd
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.iml
+.vscode/

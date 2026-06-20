@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — Buoys</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-y: scroll; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #f0f0f0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
+        ul { list-style: none; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .section-label {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 600px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: #fff;
+            color: #0a0a0a;
+        }
+        .btn-primary:hover {
+            background: #ddd;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1.5px solid rgba(255,255,255,0.3);
+        }
+        .btn-outline:hover {
+            border-color: #fff;
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-2px);
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            transition: background 0.4s ease, padding 0.4s ease;
+            background: rgba(10,10,10,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        .nav-links a {
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #aaa;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active { color: #fff; }
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+        .nav-toggle span {
+            display: block;
+            width: 26px;
+            height: 2px;
+            background: #fff;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        /* ===== PAGE HERO ===== */
+        .page-hero {
+            padding: 160px 0 80px;
+            background: linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%);
+            text-align: center;
+        }
+        .page-hero .section-subtitle {
+            margin: 0 auto;
+        }
+
+        /* ===== ABOUT CONTENT ===== */
+        .about-content {
+            padding: 0 0 120px;
+        }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .about-image {
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        .about-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            pointer-events: none;
+        }
+        .about-image img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+        }
+        .about-text p {
+            color: #bbb;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        /* ===== MEMBERS ===== */
+        .members {
+            padding: 80px 0;
+            background: #0f0f0f;
+        }
+        .members-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+        }
+        .member-card {
+            text-align: center;
+            padding: 32px 20px;
+            background: #141414;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: transform 0.3s ease;
+        }
+        .member-card:hover {
+            transform: translateY(-4px);
+        }
+        .member-card .member-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #888;
+        }
+        .member-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .member-card p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            text-align: center;
+            color: #555;
+            font-size: 0.85rem;
+        }
+        footer span { color: #888; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .about-image img { height: 300px; }
+            .members-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: #111;
+                flex-direction: column;
+                padding: 80px 40px 40px;
+                gap: 24px;
+                transition: right 0.4s ease;
+                border-left: 1px solid rgba(255,255,255,0.06);
+            }
+            .nav-links.open { right: 0; }
+            .nav-toggle { display: flex; }
+            .members-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 500px) {
+            .members-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">BUOYS</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="about.html" class="active">About</a>
+                <a href="library.html">Library</a>
+                <a href="gallery.html">Gallery</a>
+                <a href="contact.html">Contact</a>
+                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.8rem;">Facebook</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== PAGE HERO ===== -->
+    <section class="page-hero">
+        <div class="container">
+            <p class="section-label">About</p>
+            <h1 class="section-title">Who We Are</h1>
+            <p class="section-subtitle">A live electronic jamming collective based in Prague.</p>
+        </div>
+    </section>
+
+    <!-- ===== ABOUT CONTENT ===== -->
+    <section class="about-content">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image">
+                    <img src="images/band-photo-2.jpg" alt="Buoys band photo">
+                </div>
+                <div class="about-text">
+                    <p>
+                        Buoys is a band born from a shared love for raw, unfiltered sound. We blend alternative rock
+                        with elements of indie, post-punk, and shoegaze to create something that feels both familiar
+                        and new.
+                    </p>
+                    <p>
+                        Every show is a conversation — between the instruments, the silence, and the crowd. We don't
+                        just play music; we build moments. Whether in a packed club or a sweaty basement, we bring
+                        the same intensity.
+                    </p>
+                    <p>
+                        Based in Prague, we're currently writing, recording, and shaping what comes next. If you
+                        believe in music that hits you in the chest, you're in the right place.
+                    </p>
+                    <p>
+                        Buoys are about improvising and looking for the points where our waves come together.
+                        Uncertainty is the only thing you count on. We drift like loose buoys on waves.
+                    </p>
+                    <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="btn btn-primary" style="margin-top: 8px;">
+                        Follow us on Facebook
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MEMBERS ===== -->
+    <section class="members">
+        <div class="container">
+            <div class="members-header">
+                <p class="section-label">Collective</p>
+                <h2 class="section-title">The Buoys Crew</h2>
+                <p class="section-subtitle" style="margin: 0 auto;">Live electronic jamming unit consisting of:</p>
+            </div>
+            <div class="members-grid">
+                <div class="member-card">
+                    <div class="member-icon">AP</div>
+                    <h3>Anomal Panda</h3>
+                    <p>Beats & Production</p>
+                </div>
+                <div class="member-card">
+                    <div class="member-icon">VS</div>
+                    <h3>victor_stracci</h3>
+                    <p>Synths & Melodies</p>
+                </div>
+                <div class="member-card">
+                    <div class="member-icon">DW</div>
+                    <h3>DWP</h3>
+                    <p>Rhythm & Bass</p>
+                </div>
+                <div class="member-card">
+                    <div class="member-icon">ZW</div>
+                    <h3>ZEWRICH</h3>
+                    <p>Ambient & Texture</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 <span>Buoys</span>. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 60);
+        });
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinks.classList.remove('open'));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact — Buoys</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-y: scroll; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #f0f0f0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
+        ul { list-style: none; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .section-label {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 600px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: #fff;
+            color: #0a0a0a;
+        }
+        .btn-primary:hover {
+            background: #ddd;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1.5px solid rgba(255,255,255,0.3);
+        }
+        .btn-outline:hover {
+            border-color: #fff;
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-2px);
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            transition: background 0.4s ease, padding 0.4s ease;
+            background: rgba(10,10,10,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        .nav-links a {
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #aaa;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active { color: #fff; }
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+        .nav-toggle span {
+            display: block;
+            width: 26px;
+            height: 2px;
+            background: #fff;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        /* ===== PAGE HERO ===== */
+        .page-hero {
+            padding: 160px 0 80px;
+            background: linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%);
+            text-align: center;
+        }
+        .page-hero .section-subtitle {
+            margin: 0 auto;
+        }
+
+        /* ===== CONTACT LAYOUT ===== */
+        .contact-section {
+            padding: 0 0 120px;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        /* ===== SERVICE OPTIONS ===== */
+        .service-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .service-card {
+            background: #141414;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .service-card:hover {
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+        .service-card label {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 24px;
+            cursor: pointer;
+        }
+        .service-card input[type="checkbox"] {
+            display: none;
+        }
+        .service-card .service-check {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.2);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin-top: 2px;
+        }
+        .service-card input[type="checkbox"]:checked + .service-check {
+            background: #fff;
+            border-color: #fff;
+        }
+        .service-card input[type="checkbox"]:checked + .service-check::after {
+            content: '✓';
+            color: #0a0a0a;
+            font-weight: 800;
+            font-size: 0.8rem;
+        }
+        .service-card .service-info h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .service-card .service-info p {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        .service-card .service-info .service-price {
+            color: #1db954;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* ===== CONTACT FORM ===== */
+        .contact-form-wrapper {
+            background: #141414;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 40px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #ccc;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1e1e1e;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: rgba(255,255,255,0.3);
+        }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #666;
+        }
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            cursor: pointer;
+        }
+        .form-group select option {
+            background: #1e1e1e;
+            color: #fff;
+        }
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-submit {
+            width: 100%;
+            justify-content: center;
+            margin-top: 8px;
+            padding: 16px 32px;
+        }
+        .form-success {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+        .form-success.active {
+            display: block;
+        }
+        .form-success svg {
+            width: 64px;
+            height: 64px;
+            color: #1db954;
+            margin-bottom: 16px;
+        }
+        .form-success h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .form-success p {
+            color: #888;
+        }
+
+        /* ===== SOCIAL ===== */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 60px;
+            padding-top: 60px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 28px;
+            border-radius: 50px;
+            background: #141414;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .social-link:hover {
+            background: #1e1e1e;
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+        }
+        .social-link svg {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            text-align: center;
+            color: #555;
+            font-size: 0.85rem;
+        }
+        footer span { color: #888; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: #111;
+                flex-direction: column;
+                padding: 80px 40px 40px;
+                gap: 24px;
+                transition: right 0.4s ease;
+                border-left: 1px solid rgba(255,255,255,0.06);
+            }
+            .nav-links.open { right: 0; }
+            .nav-toggle { display: flex; }
+            .contact-form-wrapper {
+                padding: 24px;
+            }
+            .social-links {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">BUOYS</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="library.html">Library</a>
+                <a href="gallery.html">Gallery</a>
+                <a href="contact.html" class="active">Contact</a>
+                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.8rem;">Facebook</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== PAGE HERO ===== -->
+    <section class="page-hero">
+        <div class="container">
+            <p class="section-label">Contact</p>
+            <h1 class="section-title">Get in Touch</h1>
+            <p class="section-subtitle">Book us for your next event, club night, or collaborate with us.</p>
+        </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="contact-grid">
+                <!-- Service Options -->
+                <div>
+                    <p class="section-label">Services</p>
+                    <h2 class="section-title" style="font-size: clamp(1.5rem, 3vw, 2rem);">What We Offer</h2>
+                    <p class="section-subtitle" style="font-size: 0.95rem; margin-bottom: 32px; max-width: 100%;">Select the services you're interested in and we'll get back to you with a tailored quote.</p>
+                    <div class="service-options" id="serviceOptions">
+                        <div class="service-card">
+                            <label>
+                                <input type="checkbox" value="play-club" data-price="500">
+                                <span class="service-check"></span>
+                                <div class="service-info">
+                                    <h3>Play Live at a Club</h3>
+                                    <p>We bring our full live electronic jamming set to your club. Raw, improvised, and energetic.</p>
+                                    <div class="service-price">from €500</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="service-card">
+                            <label>
+                                <input type="checkbox" value="play-event" data-price="800">
+                                <span class="service-check"></span>
+                                <div class="service-info">
+                                    <h3>Play at an Event</h3>
+                                    <p>Festivals, private events, corporate functions — we adapt our set to any vibe.</p>
+                                    <div class="service-price">from €800</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="service-card">
+                            <label>
+                                <input type="checkbox" value="play-collab" data-price="350">
+                                <span class="service-check"></span>
+                                <div class="service-info">
+                                    <h3>Collaborate / Play with More Bands</h3>
+                                    <p>We're open to jamming with other musicians, co-headlining shows, or collaborative projects.</p>
+                                    <div class="service-price">from €350</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="service-card">
+                            <label>
+                                <input type="checkbox" value="studio" data-price="200">
+                                <span class="service-check"></span>
+                                <div class="service-info">
+                                    <h3>Studio Session / Recording</h3>
+                                    <p>Book us for a studio recording session or collaborative writing camp.</p>
+                                    <div class="service-price">from €200</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div>
+                    <div class="contact-form-wrapper" id="contactFormWrapper">
+                        <div id="formContainer">
+                            <p class="section-label">Inquiry</p>
+                            <h2 class="section-title" style="font-size: clamp(1.5rem, 3vw, 2rem);">Send a Message</h2>
+                            <p class="section-subtitle" style="font-size: 0.9rem; margin-bottom: 32px; max-width: 100%;">Fill out the form below and we'll respond as soon as possible.</p>
+
+                            <form id="contactForm" action="#" method="POST">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="formName">Name *</label>
+                                        <input type="text" id="formName" name="name" placeholder="Your name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="formEmail">Email *</label>
+                                        <input type="email" id="formEmail" name="email" placeholder="your@email.com" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="formPhone">Phone (optional)</label>
+                                    <input type="tel" id="formPhone" name="phone" placeholder="+420 123 456 789">
+                                </div>
+                                <div class="form-group">
+                                    <label for="formSubject">Subject *</label>
+                                    <select id="formSubject" name="subject" required>
+                                        <option value="">Select a subject…</option>
+                                        <option value="club">Book for Club Performance</option>
+                                        <option value="event">Book for Event / Festival</option>
+                                        <option value="collab">Collaboration Proposal</option>
+                                        <option value="studio">Studio Session Inquiry</option>
+                                        <option value="general">General Inquiry</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="formMessage">Message *</label>
+                                    <textarea id="formMessage" name="message" placeholder="Tell us about your event, venue, or idea…" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Selected Services:</label>
+                                    <div id="selectedServices" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 32px; padding: 4px 0;">
+                                        <span style="color: #666; font-size: 0.85rem;">None selected</span>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary form-submit" id="formSubmitBtn">
+                                    Send Inquiry
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="form-success" id="formSuccess">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <h3>Message Sent!</h3>
+                            <p>Thank you for reaching out. We'll get back to you within 48 hours.</p>
+                            <button class="btn btn-outline" style="margin-top: 20px;" onclick="resetForm()">Send Another Message</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="social-links">
+                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="social-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    Facebook
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="social-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                    X (Twitter)
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="social-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                    Instagram
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 <span>Buoys</span>. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 60);
+        });
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinks.classList.remove('open'));
+        });
+
+        // ===== SERVICE CHECKBOXES → UPDATE SELECTED DISPLAY =====
+        const serviceCheckboxes = document.querySelectorAll('#serviceOptions input[type="checkbox"]');
+        const selectedServicesDiv = document.getElementById('selectedServices');
+
+        serviceCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateSelectedServices);
+        });
+
+        function updateSelectedServices() {
+            const checked = Array.from(serviceCheckboxes).filter(cb => cb.checked);
+            if (checked.length === 0) {
+                selectedServicesDiv.innerHTML = '<span style="color: #666; font-size: 0.85rem;">None selected</span>';
+                return;
+            }
+            selectedServicesDiv.innerHTML = checked.map(cb => {
+                const label = cb.closest('.service-card').querySelector('h3').textContent;
+                return `<span style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.1);">${label}</span>`;
+            }).join('');
+        }
+
+        // ===== FORM SUBMISSION =====
+        const contactForm = document.getElementById('contactForm');
+        const formContainer = document.getElementById('formContainer');
+        const formSuccess = document.getElementById('formSuccess');
+
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Collect selected services
+            const checkedServices = Array.from(serviceCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.closest('.service-card').querySelector('h3').textContent);
+
+            // Build form data
+            const formData = {
+                name: document.getElementById('formName').value,
+                email: document.getElementById('formEmail').value,
+                phone: document.getElementById('formPhone').value,
+                subject: document.getElementById('formSubject').value,
+                message: document.getElementById('formMessage').value,
+                services: checkedServices
+            };
+
+            console.log('Form submitted:', formData);
+
+            // Show success state
+            formContainer.style.display = 'none';
+            formSuccess.classList.add('active');
+        });
+
+        function resetForm() {
+            contactForm.reset();
+            updateSelectedServices();
+            formContainer.style.display = 'block';
+            formSuccess.classList.remove('active');
+        }
+    </script>
+</body>
+</html>

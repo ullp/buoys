@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery — Buoys</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-y: scroll; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #f0f0f0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+        img { max-width: 100%; height: auto; display: block; }
+        ul { list-style: none; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .section-label {
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+        }
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            max-width: 600px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: #fff;
+            color: #0a0a0a;
+        }
+        .btn-primary:hover {
+            background: #ddd;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1.5px solid rgba(255,255,255,0.3);
+        }
+        .btn-outline:hover {
+            border-color: #fff;
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-2px);
+        }
+
+        /* ===== NAV ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            transition: background 0.4s ease, padding 0.4s ease;
+            background: rgba(10,10,10,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        .nav-links a {
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #aaa;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active { color: #fff; }
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+        .nav-toggle span {
+            display: block;
+            width: 26px;
+            height: 2px;
+            background: #fff;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        /* ===== PAGE HERO ===== */
+        .page-hero {
+            padding: 160px 0 80px;
+            background: linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%);
+            text-align: center;
+        }
+        .page-hero .section-subtitle {
+            margin: 0 auto;
+        }
+
+        /* ===== GALLERY ===== */
+        .gallery-section {
+            padding: 0 0 120px;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .gallery-item {
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            aspect-ratio: 1;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease, filter 0.6s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.08);
+            filter: brightness(0.7);
+        }
+        .gallery-item.tall {
+            grid-row: span 2;
+            aspect-ratio: auto;
+        }
+        .gallery-item.wide {
+            grid-column: span 2;
+            aspect-ratio: 2 / 1;
+        }
+
+        /* ===== LIGHTBOX ===== */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0,0,0,0.95);
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            cursor: pointer;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+        .lightbox-close:hover { opacity: 1; }
+
+        /* ===== FOOTER ===== */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            text-align: center;
+            color: #555;
+            font-size: 0.85rem;
+        }
+        footer span { color: #888; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .gallery-item.wide { grid-column: span 2; }
+            .gallery-item.tall { grid-row: span 1; }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: #111;
+                flex-direction: column;
+                padding: 80px 40px 40px;
+                gap: 24px;
+                transition: right 0.4s ease;
+                border-left: 1px solid rgba(255,255,255,0.06);
+            }
+            .nav-links.open { right: 0; }
+            .nav-toggle { display: flex; }
+            .gallery-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .gallery-item.wide { grid-column: span 2; }
+        }
+        @media (max-width: 500px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+            .gallery-item.wide { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAV ===== -->
+    <nav id="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">BUOYS</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="library.html">Library</a>
+                <a href="gallery.html" class="active">Gallery</a>
+                <a href="contact.html">Contact</a>
+                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.8rem;">Facebook</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== PAGE HERO ===== -->
+    <section class="page-hero">
+        <div class="container">
+            <p class="section-label">Gallery</p>
+            <h1 class="section-title">Moments</h1>
+            <p class="section-subtitle">A visual diary of who we are and what we do.</p>
+        </div>
+    </section>
+
+    <!-- ===== GALLERY ===== -->
+    <section class="gallery-section">
+        <div class="container">
+            <div class="gallery-grid">
+                <div class="gallery-item wide">
+                    <img src="images/band-photo-1.jpg" alt="Buoys photo 1" loading="lazy">
+                </div>
+                <div class="gallery-item tall">
+                    <img src="images/band-photo-2.jpg" alt="Buoys photo 2" loading="lazy">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/band-photo-3.jpg" alt="Buoys photo 3" loading="lazy">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/band-photo-4.jpg" alt="Buoys photo 4" loading="lazy">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/band-photo-5.jpg" alt="Buoys photo 5" loading="lazy">
+                </div>
+                <div class="gallery-item">
+                    <img src="images/band-photo-6.jpg" alt="Buoys photo 6" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 <span>Buoys</span>. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- ===== LIGHTBOX ===== -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <img id="lightboxImg" src="" alt="Enlarged photo">
+    </div>
+
+    <script>
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 60);
+        });
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinks.classList.remove('open'));
+        });
+
+        // Lightbox
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxClose = document.getElementById('lightboxClose');
+        document.querySelectorAll('.gallery-item img').forEach(img => {
+            img.addEventListener('click', () => {
+                lightboxImg.src = img.src;
+                lightbox.classList.add('active');
+            });
+        });
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox || e.target === lightboxClose) {
+                lightbox.classList.remove('active');
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') lightbox.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
