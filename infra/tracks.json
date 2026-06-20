@@ -1,0 +1,63 @@
+{
+  "tracks": [
+    {
+      "id": "track-1",
+      "title": "Session Dobrichlapci — Track 1",
+      "artist": "Buoys",
+      "s3_key": "tracks/session Dobrichlapci - edit - Track 1 - Mac-9-5.wav",
+      "duration": "5:42",
+      "durationSec": 342
+    },
+    {
+      "id": "track-2",
+      "title": "Session Dobrichlapci — Track 2",
+      "artist": "Buoys",
+      "s3_key": "tracks/session Dobrichlapci - edit - Track 2 - Mac-9-5.wav",
+      "duration": "4:18",
+      "durationSec": 258
+    },
+    {
+      "id": "track-3",
+      "title": "Session Dobrichlapci — Track 3",
+      "artist": "Buoys",
+      "s3_key": "tracks/session Dobrichlapci - edit - Track 3 - Mac-9-5.wav",
+      "duration": "5:01",
+      "durationSec": 301
+    },
+    {
+      "id": "track-4",
+      "title": "Session Dobrichlapci — Track 4",
+      "artist": "Buoys",
+      "s3_key": "tracks/session Dobrichlapci - edit - Track 4 - Mac-9-5.wav",
+      "duration": "6:33",
+      "durationSec": 393
+    },
+    {
+      "id": "track-5",
+      "title": "Session Dobrichlapci — Track 5",
+      "artist": "Buoys",
+      "s3_key": "tracks/session Dobrichlapci - edit - Track 5 - MAC-9-5.wav",
+      "duration": "4:45",
+      "durationSec": 285
+    },
+    {
+      "id": "track-6",
+      "title": "Speedstop 09.05.2023",
+      "artist": "Buoys",
+      "s3_key": "tracks/Speedstop 09.05.2023.mp3",
+      "duration": "7:20",
+      "durationSec": 440
+    },
+    {
+      "id": "track-7",
+      "title": "0001 3-Audio-1",
+      "artist": "Buoys",
+      "s3_key": "tracks/0001 3-Audio-1.wav",
+      "duration": "3:30",
+      "durationSec": 210
+    }
+  ],
+  "hero_video": {
+    "s3_key": "tracks/hero-bg-video.mp4"
+  }
+}

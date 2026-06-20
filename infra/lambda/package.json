@@ -1,0 +1,9 @@
+{
+  "name": "buoys-signed-url-lambda",
+  "version": "1.0.0",
+  "description": "Lambda function to generate signed CloudFront URLs for Buoys media",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.600.0"
+  }
+}

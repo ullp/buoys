@@ -205,18 +205,23 @@
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
             margin: 0 auto 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: 800;
-            color: #888;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        }
+        .member-card .member-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         .member-card h3 {
             font-size: 1.1rem;
             font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .member-card .member-name {
+            color: #bbb;
+            font-size: 0.9rem;
             margin-bottom: 4px;
         }
         .member-card p {
@@ -345,24 +350,36 @@
             </div>
             <div class="members-grid">
                 <div class="member-card">
-                    <div class="member-icon">AP</div>
+                    <div class="member-icon">
+                        <img src="https://graph.facebook.com/1662318858/picture?type=large" alt="Anomal Panda" onerror="this.style.display='none'">
+                    </div>
                     <h3>Anomal Panda</h3>
-                    <p>Beats & Production</p>
+                    <p class="member-name">Jan Špáta</p>
+                    <p>modular & beats</p>
                 </div>
                 <div class="member-card">
-                    <div class="member-icon">VS</div>
-                    <h3>victor_stracci</h3>
-                    <p>Synths & Melodies</p>
+                    <div class="member-icon">
+                        <img src="https://graph.facebook.com/jiri.smutny/picture?type=large" alt="victor_stracci" onerror="this.style.display='none'">
+                    </div>
+                    <h3>Victor Stracci</h3>
+                    <p class="member-name">Jiří Smutný</p>
+                    <p>beats & samples</p>
                 </div>
                 <div class="member-card">
-                    <div class="member-icon">DW</div>
+                    <div class="member-icon">
+                        <img src="https://graph.facebook.com/100083382996368/picture?type=large" alt="DWP" onerror="this.style.display='none'">
+                    </div>
                     <h3>DWP</h3>
-                    <p>Rhythm & Bass</p>
+                    <p class="member-name">Petr Ullmann</p>
+                    <p>analog & sample scapes</p>
                 </div>
                 <div class="member-card">
-                    <div class="member-icon">ZW</div>
+                    <div class="member-icon">
+                        <img src="https://graph.facebook.com/kroutiltim/picture?type=large" alt="ZEWRICH" onerror="this.style.display='none'">
+                    </div>
                     <h3>ZEWRICH</h3>
-                    <p>Ambient & Texture</p>
+                    <p class="member-name">Richard Kroutil</p>
+                    <p>synths & samples</p>
                 </div>
             </div>
         </div>

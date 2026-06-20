@@ -1,0 +1,23 @@
+# ============================================================
+# Required variables for Buoys media infrastructure
+# Copy this file to terraform.tfvars and fill in your values
+# ============================================================
+
+# Your unique S3 bucket name (must be globally unique)
+bucket_name = "buoys-media-files"
+
+# Your GitHub Pages domain (e.g., "ullp.github.io" or "buoys.example.com")
+domain_name = "ullp.github.io"
+
+# Path to the CloudFront public key PEM file (relative to this directory)
+# Generate with: openssl genrsa -out cloudfront-private-key.pem 2048
+# Then extract public key: openssl rsa -pubout -in cloudfront-private-key.pem -out cloudfront-public-key.pem
+cloudfront_public_key_path = "cloudfront-public-key.pem"
+
+# SSM Parameter Store path for the CloudFront private key
+# After generating the private key, store it with:
+# aws ssm put-parameter --name "/buoys/cloudfront-private-key" --type "SecureString" --value "$(cat cloudfront-private-key.pem)"
+cloudfront_private_key_ssm_path = "/buoys/cloudfront-private-key"
+
+# AWS region
+aws_region = "eu-west-1"

@@ -1,0 +1,16 @@
+# Terraform
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform/
+terraform.tfplan
+
+# Lambda zip
+lambda.zip
+
+# CloudFront keys (sensitive!)
+cloudfront-private-key.pem
+cloudfront-public-key.pem
+
+# Node modules
+lambda/node_modules/
