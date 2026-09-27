@@ -16,6 +16,8 @@ provider "aws" {
   region = var.aws_region
 }
 
+data "aws_region" "current" {}
+
 # ============================================================
 # Variables
 # ============================================================
@@ -50,6 +52,18 @@ variable "cloudfront_private_key_ssm_path" {
   description = "SSM Parameter Store path for the CloudFront private key PEM"
   type        = string
   default     = "/buoys/cloudfront-private-key"
+}
+
+variable "live_admin_token" {
+  description = "Shared secret required to create a browser live session"
+  type        = string
+  sensitive   = true
+}
+
+variable "live_stream_key" {
+  description = "Amazon IVS stream key value created manually in AWS for the live channel"
+  type        = string
+  sensitive   = true
 }
 
 # ============================================================
@@ -262,7 +276,26 @@ resource "aws_lambda_function" "signed_url" {
       PREVIEW_DURATION_SECONDS   = "20"
       RENT_DURATION_HOURS        = "24"
       BUY_DURATION_DAYS          = "365"
+      LIVE_ADMIN_TOKEN           = var.live_admin_token
+      LIVE_PLAYBACK_URL          = aws_ivs_channel.live.playback_url
+      LIVE_INGEST_ENDPOINT       = aws_ivs_channel.live.ingest_endpoint
+      LIVE_STREAM_KEY            = var.live_stream_key
     }
+  }
+}
+
+# ============================================================
+# Amazon IVS live channel for browser-based broadcast
+# ============================================================
+resource "aws_ivs_channel" "live" {
+  name                   = "${var.bucket_name}-live"
+  latency_mode           = "LOW"
+  type                   = "STANDARD"
+  authorized             = false
+
+  tags = {
+    Name    = "buoys-live"
+    Project = "buoys"
   }
 }
 
@@ -280,6 +313,18 @@ resource "aws_api_gateway_resource" "audio" {
   path_part   = "audio"
 }
 
+resource "aws_api_gateway_resource" "live" {
+  rest_api_id = aws_api_gateway_rest_api.media.id
+  parent_id   = aws_api_gateway_rest_api.media.root_resource_id
+  path_part   = "live"
+}
+
+resource "aws_api_gateway_resource" "live_session" {
+  rest_api_id = aws_api_gateway_rest_api.media.id
+  parent_id   = aws_api_gateway_resource.live.id
+  path_part   = "session"
+}
+
 resource "aws_api_gateway_resource" "audio_track" {
   rest_api_id = aws_api_gateway_rest_api.media.id
   parent_id   = aws_api_gateway_resource.audio.id
@@ -293,6 +338,20 @@ resource "aws_api_gateway_method" "audio_track_get" {
   authorization = "NONE"
 }
 
+resource "aws_api_gateway_method" "live_session_post" {
+  rest_api_id   = aws_api_gateway_rest_api.media.id
+  resource_id   = aws_api_gateway_resource.live_session.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_method" "live_session_options" {
+  rest_api_id   = aws_api_gateway_rest_api.media.id
+  resource_id   = aws_api_gateway_resource.live_session.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
 resource "aws_api_gateway_integration" "audio_track_get" {
   rest_api_id             = aws_api_gateway_rest_api.media.id
   resource_id             = aws_api_gateway_resource.audio_track.id
@@ -300,6 +359,58 @@ resource "aws_api_gateway_integration" "audio_track_get" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.signed_url.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "live_session_post" {
+  rest_api_id             = aws_api_gateway_rest_api.media.id
+  resource_id             = aws_api_gateway_resource.live_session.id
+  http_method             = aws_api_gateway_method.live_session_post.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.signed_url.invoke_arn
+}
+
+resource "aws_api_gateway_integration" "live_session_options" {
+  rest_api_id = aws_api_gateway_rest_api.media.id
+  resource_id = aws_api_gateway_resource.live_session.id
+  http_method = aws_api_gateway_method.live_session_options.http_method
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+resource "aws_api_gateway_method_response" "live_session_options_200" {
+  rest_api_id = aws_api_gateway_rest_api.media.id
+  resource_id = aws_api_gateway_resource.live_session.id
+  http_method = aws_api_gateway_method.live_session_options.http_method
+  status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "live_session_options_200" {
+  rest_api_id = aws_api_gateway_rest_api.media.id
+  resource_id = aws_api_gateway_resource.live_session.id
+  http_method = aws_api_gateway_method.live_session_options.http_method
+  status_code = aws_api_gateway_method_response.live_session_options_200.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Live-Admin-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+
+  depends_on = [aws_api_gateway_integration.live_session_options]
 }
 
 resource "aws_lambda_permission" "api_gateway" {
@@ -311,7 +422,12 @@ resource "aws_lambda_permission" "api_gateway" {
 }
 
 resource "aws_api_gateway_deployment" "media" {
-  depends_on = [aws_api_gateway_integration.audio_track_get]
+  depends_on = [
+    aws_api_gateway_integration.audio_track_get,
+    aws_api_gateway_integration.live_session_post,
+    aws_api_gateway_integration.live_session_options,
+    aws_api_gateway_integration_response.live_session_options_200,
+  ]
 
   rest_api_id = aws_api_gateway_rest_api.media.id
   stage_name  = var.api_gateway_stage
@@ -325,7 +441,15 @@ output "cloudfront_domain" {
 }
 
 output "api_endpoint" {
-  value = "${aws_api_gateway_deployment.media.invoke_url}/audio"
+  value = "https://${aws_api_gateway_rest_api.media.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.api_gateway_stage}/audio"
+}
+
+output "live_session_endpoint" {
+  value = "https://${aws_api_gateway_rest_api.media.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.api_gateway_stage}/live/session"
+}
+
+output "live_playback_url" {
+  value = aws_ivs_channel.live.playback_url
 }
 
 output "s3_bucket" {

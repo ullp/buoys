@@ -68,6 +68,64 @@ function generateSignedUrl(resourceUrl, privateKeyPem, keyPairId, expiresInSecon
   return `${resourceUrl}${separator}Expires=${expiryTime}&Signature=${encodedSignature}&Key-Pair-Id=${keyPairId}`;
 }
 
+function json(statusCode, body, extraHeaders = {}) {
+  return {
+    statusCode,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type,X-Live-Admin-Token',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Cache-Control': 'no-store',
+      ...extraHeaders,
+    },
+    body: JSON.stringify(body),
+  };
+}
+
+async function handleLiveSession(event) {
+  if (event.requestContext?.httpMethod === 'OPTIONS' || event.httpMethod === 'OPTIONS') {
+    return json(200, { ok: true });
+  }
+
+  const expectedToken = process.env.LIVE_ADMIN_TOKEN;
+  const suppliedToken =
+    event.headers?.['x-live-admin-token'] ||
+    event.headers?.['X-Live-Admin-Token'] ||
+    (() => {
+      try {
+        return event.body ? JSON.parse(event.body).adminToken : undefined;
+      } catch {
+        return undefined;
+      }
+    })();
+
+  if (!expectedToken) {
+    return json(500, { error: 'LIVE_ADMIN_TOKEN is not configured' });
+  }
+
+  if (!suppliedToken || suppliedToken !== expectedToken) {
+    return json(401, { error: 'Invalid live admin token' });
+  }
+
+  const streamKey = process.env.LIVE_STREAM_KEY;
+  const ingestEndpoint = process.env.LIVE_INGEST_ENDPOINT;
+  const playbackUrl = process.env.LIVE_PLAYBACK_URL;
+
+  if (!streamKey || !ingestEndpoint || !playbackUrl) {
+    return json(500, { error: 'Live streaming environment variables are incomplete' });
+  }
+
+  return json(200, {
+    ingestEndpoint,
+    streamKey,
+    playbackUrl,
+    streamUrl: `rtmps://${ingestEndpoint}:443/app/`,
+    channelType: 'STANDARD',
+    latencyMode: 'LOW',
+  });
+}
+
 /**
  * Lambda handler for GET /audio/{trackId}
  *
@@ -78,16 +136,16 @@ function generateSignedUrl(resourceUrl, privateKeyPem, keyPairId, expiresInSecon
  */
 exports.handler = async (event) => {
   try {
+    const resourcePath = event.resource || event.requestContext?.resourcePath || '';
+    const path = event.path || '';
+
+    if (resourcePath === '/live/session' || path.endsWith('/live/session')) {
+      return await handleLiveSession(event);
+    }
+
     const trackId = event.pathParameters?.trackId;
     if (!trackId) {
-      return {
-        statusCode: 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: 'Missing trackId parameter' }),
-      };
+      return json(400, { error: 'Missing trackId parameter' });
     }
 
     // Determine the access type and corresponding duration
@@ -105,14 +163,7 @@ exports.handler = async (event) => {
         expiresInSeconds = parseInt(process.env.BUY_DURATION_DAYS || '365', 10) * 86400;
         break;
       default:
-        return {
-          statusCode: 400,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-          body: JSON.stringify({ error: `Invalid type: ${accessType}. Use "preview", "rent", or "buy".` }),
-        };
+        return json(400, { error: `Invalid type: ${accessType}. Use "preview", "rent", or "buy".` });
     }
 
     // Map trackId to S3 key (clean lowercase filenames, no spaces/dates)
@@ -130,14 +181,7 @@ exports.handler = async (event) => {
 
     const s3Key = trackManifest[trackId];
     if (!s3Key) {
-      return {
-        statusCode: 404,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify({ error: `Track not found: ${trackId}` }),
-      };
+      return json(404, { error: `Track not found: ${trackId}` });
     }
 
     const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN;
@@ -154,29 +198,14 @@ exports.handler = async (event) => {
     const privateKeyPem = await getPrivateKey();
     const signedUrl = generateSignedUrl(resourceUrl, privateKeyPem, keyPairId, expiresInSeconds);
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-store',
-      },
-      body: JSON.stringify({
-        trackId,
-        accessType,
-        url: signedUrl,
-        expiresInSeconds,
-      }),
-    };
+    return json(200, {
+      trackId,
+      accessType,
+      url: signedUrl,
+      expiresInSeconds,
+    });
   } catch (error) {
     console.error('Error generating signed URL:', error);
-    return {
-      statusCode: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'Internal server error' }),
-    };
+    return json(500, { error: 'Internal server error' });
   }
 };
