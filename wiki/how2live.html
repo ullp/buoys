@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Go Live — Buoys Internal Wiki</title>
+    <style>
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            background: #111;
+            color: #f2f2f2;
+            line-height: 1.65;
+        }
+        .wrap { max-width: 980px; margin: 0 auto; padding: 48px 24px 96px; }
+        h1, h2, h3 { line-height: 1.15; }
+        h1 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 12px; }
+        h2 { margin-top: 42px; font-size: 1.5rem; }
+        h3 { margin-top: 24px; font-size: 1.1rem; }
+        p, li { color: #d2d2d2; }
+        .lead { color: #aaa; max-width: 780px; }
+        .box {
+            margin-top: 20px; padding: 20px; border-radius: 16px;
+            background: #181818; border: 1px solid rgba(255,255,255,0.08);
+        }
+        .warn { border-color: rgba(255,77,77,0.25); background: rgba(255,77,77,0.08); }
+        .ok { border-color: rgba(29,185,84,0.25); background: rgba(29,185,84,0.08); }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 6px; color: #fff;
+        }
+        ul, ol { padding-left: 22px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); vertical-align: top; }
+        th { color: #fff; }
+        .small { color: #9a9a9a; font-size: 0.95rem; }
+        .grid { display: grid; gap: 18px; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .checklist li { margin-bottom: 8px; }
+        .step-title { color: #fff; font-weight: 700; }
+        @media (max-width: 760px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>How to Go Live</h1>
+        <p class="lead">Internal operator document for Buoys live streaming. This file is intended to stay in the project structure only and should not be exposed as part of the public site.</p>
+
+        <div class="box warn">
+            <strong>Read this first:</strong>
+            <ul>
+                <li>The previous public <code>live.html</code> was not actually ready as a public production page because it exposed internal streaming setup and operator controls.</li>
+                <li>Use this document as the setup reference, and keep the public page limited to viewer-safe information only.</li>
+                <li>Do not publish admin tokens, stream keys, private endpoints, or internal notes.</li>
+            </ul>
+        </div>
+
+        <h2>1. What you need before going live</h2>
+        <div class="box">
+            <ul>
+                <li>A deployed AWS live backend from the <code>infra/</code> folder</li>
+                <li>A valid <code>live_admin_token</code></li>
+                <li>A configured <code>live_stream_key</code></li>
+                <li>The Terraform output for <code>live_session_endpoint</code></li>
+                <li>A Chromium-based browser for best IVS broadcast compatibility</li>
+                <li>Stable internet, power, camera, and microphone/audio routing</li>
+                <li>OBS Studio installed on the operator machine</li>
+                <li>A webcam connected and recognized by macOS</li>
+                <li>A clean studio audio feed from <code>REC OUT</code>, <code>MAIN OUT</code>, or mixer USB audio</li>
+                <li>An audio interface or mixer USB connection if the laptop has no clean line-level input</li>
+            </ul>
+        </div>
+
+        <h2>2. Recommended physical signal chain</h2>
+        <div class="box ok">
+            <div class="two-col">
+                <div>
+                    <h3>Preferred setup</h3>
+                    <ol class="checklist">
+                        <li><span class="step-title">Audio:</span> Mixer <code>REC OUT</code> → audio interface line input → OBS <code>Audio Input Capture</code></li>
+                        <li><span class="step-title">Video:</span> USB webcam → OBS <code>Video Capture Device</code></li>
+                        <li><span class="step-title">Streaming:</span> OBS → IVS ingest server + stream key</li>
+                    </ol>
+                </div>
+                <div>
+                    <h3>Fallbacks</h3>
+                    <ul>
+                        <li>If the mixer has USB audio, use that directly instead of a separate interface.</li>
+                        <li>If <code>REC OUT</code> is unavailable, use <code>MAIN OUT</code> only if levels are stable and not affected unexpectedly during the show.</li>
+                        <li>Do not rely on the laptop mic or webcam mic as the main source unless it is emergency backup only.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>3. What was exposed publicly and why that was risky</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Exposed item</th>
+                    <th>Why it should not live on the public page</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Detailed operator checklist</td>
+                    <td>Useful internally, but unnecessary for visitors and reveals workflow structure.</td>
+                </tr>
+                <tr>
+                    <td>Backend preparation flow</td>
+                    <td>Explains infrastructure and stream startup process publicly.</td>
+                </tr>
+                <tr>
+                    <td>Admin token instructions</td>
+                    <td>Even without the token value, it advertises how protected access works.</td>
+                </tr>
+                <tr>
+                    <td>IVS stream key guidance</td>
+                    <td>References the exact secret and deployment structure used to operate streaming.</td>
+                </tr>
+                <tr>
+                    <td>Direct operator controls</td>
+                    <td>Public viewers should never see prepare/go-live/stop tooling.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>4. Pre-flight checklist</h2>
+        <div class="box ok">
+            <ol>
+                <li>Confirm the operator machine is on reliable power.</li>
+                <li>Use wired internet if possible.</li>
+                <li>Close unnecessary apps and browser tabs.</li>
+                <li>Disable notifications, sleep mode, and auto-updates.</li>
+                <li>Check camera framing, light, and focus.</li>
+                <li>Confirm the intended audio input is the studio mix, not the laptop mic by mistake.</li>
+                <li>Verify there is no clipping in the source chain.</li>
+                <li>Open <strong>System Settings → Privacy &amp; Security</strong> and confirm OBS/browser camera and microphone permissions are allowed.</li>
+                <li>Put the phone on silent and avoid incoming call notifications on the operator machine.</li>
+            </ol>
+        </div>
+
+        <h2>5. OBS setup for webcam + studio audio</h2>
+        <div class="box">
+            <h3>Create the OBS scene</h3>
+            <ol class="checklist">
+                <li>Open OBS Studio.</li>
+                <li>Create a scene named <code>Buoys Live</code>.</li>
+                <li>Add <code>Video Capture Device</code> and choose the webcam.</li>
+                <li>Add <code>Audio Input Capture</code> and choose the audio interface, mixer USB audio device, or line input carrying the studio mix.</li>
+                <li>If OBS also auto-added your MacBook mic or webcam mic, mute or remove those extra sources.</li>
+            </ol>
+
+            <h3>Set audio levels</h3>
+            <ul>
+                <li>Play music or speak through the real studio path.</li>
+                <li>Watch the OBS meters and aim for normal peaks around <code>-12 dB</code> to <code>-6 dB</code>.</li>
+                <li>Avoid red clipping at all times.</li>
+                <li>If necessary, lower gain on the interface or mixer output before adjusting aggressively in software.</li>
+            </ul>
+
+            <h3>Useful OBS filters</h3>
+            <ul>
+                <li>Add a <code>Limiter</code> to the main studio audio source.</li>
+                <li>Optional: add mild compression only if the stream is too dynamic.</li>
+                <li>Do not over-process the studio mix if the mixer output is already balanced.</li>
+            </ul>
+        </div>
+
+        <h2>6. Credentials and backend preparation</h2>
+        <h3>API base URL</h3>
+        <p>Take the Terraform <code>live_session_endpoint</code> output and remove the trailing <code>/live/session</code>. Use only the remaining base URL.</p>
+
+        <h3>Admin token</h3>
+        <p>Use the exact value configured as <code>live_admin_token</code>. Keep it private and rotate it if it has been shared or shown publicly.</p>
+
+        <h3>IVS stream key</h3>
+        <p>Ensure <code>live_stream_key</code> is configured correctly in deployment variables and matches the live channel in AWS.</p>
+
+        <h2>7. Stream startup workflow</h2>
+        <div class="box">
+            <ol>
+                <li>Open the operator version of the live control interface locally or in a protected environment.</li>
+                <li>Paste the API base URL.</li>
+                <li>Enter the live admin token.</li>
+                <li>Click <strong>Prepare Stream</strong>.</li>
+                <li>Confirm the playback URL and ingest details are returned correctly.</li>
+                <li>Copy the returned ingest server / stream URL and the stream key into OBS <strong>Settings → Stream</strong>.</li>
+                <li>Back in OBS, confirm webcam preview is visible and the studio audio meters are moving.</li>
+                <li>Click <strong>Start Streaming</strong> in OBS.</li>
+                <li>If the protected operator page also has a <strong>Go Live</strong> action, use it only if your backend workflow requires that separate activation step.</li>
+                <li>Watch both the local preview and the public playback output for the first minute.</li>
+            </ol>
+        </div>
+
+        <h2>8. Quick troubleshooting</h2>
+        <div class="box">
+            <div class="grid">
+                <div>
+                    <h3>No webcam picture</h3>
+                    <ul>
+                        <li>Reconnect the webcam.</li>
+                        <li>Close other apps that may be using the camera.</li>
+                        <li>Re-check OBS camera permissions in macOS.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>No audio from studio mix</h3>
+                    <ul>
+                        <li>Confirm the cable really comes from <code>REC OUT</code>, <code>MAIN OUT</code>, or the intended USB mixer feed.</li>
+                        <li>Check the selected OBS audio device.</li>
+                        <li>Check interface gain and make sure the input is not muted at hardware level.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Audio is distorted</h3>
+                    <ul>
+                        <li>Lower mixer output or interface gain.</li>
+                        <li>Keep OBS out of the red.</li>
+                        <li>Prefer hardware gain correction over heavy software attenuation.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Stream starts but public page is blank</h3>
+                    <ul>
+                        <li>Verify the playback URL was returned during preparation.</li>
+                        <li>Check that the public page is using the viewer playback URL, not ingest details.</li>
+                        <li>Give the platform a short warm-up window for the first live signal.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2>9. What “ready” actually means</h2>
+        <div class="box">
+            <p>The setup is only truly ready when all of the following are true:</p>
+            <ul>
+                <li>The infrastructure has been deployed successfully.</li>
+                <li>The live session endpoint responds correctly.</li>
+                <li>The admin token works.</li>
+                <li>The IVS stream key is valid.</li>
+                <li>Camera and audio devices are recognized.</li>
+                <li>OBS is showing the correct webcam image.</li>
+                <li>OBS is showing the correct studio audio input, not the wrong microphone.</li>
+                <li>The playback preview confirms end-to-end delivery.</li>
+            </ul>
+            <p class="small">Based on the previous public page alone, readiness was not guaranteed — the page mostly documented the workflow, but did not prove the live system was safely or fully operational.</p>
+        </div>
+
+        <h2>10. Suggested run of show</h2>
+        <div class="box">
+            <ul>
+                <li><strong>T-30:</strong> technical check, audio path, framing, bandwidth</li>
+                <li><strong>T-15:</strong> backend prep, verify playback URL</li>
+                <li><strong>T-05:</strong> final silence, notifications off, performers ready</li>
+                <li><strong>LIVE:</strong> start stream and monitor first minute carefully</li>
+                <li><strong>END:</strong> stop cleanly and note any issues for next time</li>
+            </ul>
+        </div>
+
+        <h2>11. Recommended next improvement</h2>
+        <div class="box warn">
+            <p>Create a dedicated operator-only page or internal tool that is not part of the public site deployment. The public <code>live.html</code> should remain viewer-safe, while the operator console should live behind access control or outside the published website entirely.</p>
+            <p class="small">A separate operator helper page is recommended for copy-paste fields, final checks, OBS reminders, and stream-day procedure.</p>
+        </div>
+    </div>
+</body>
+</html>

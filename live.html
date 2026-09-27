@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Stream — Buoys</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-y: scroll; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(255,77,77,0.16), transparent 28%),
+                radial-gradient(circle at 80% 10%, rgba(255,255,255,0.06), transparent 24%),
+                linear-gradient(180deg, #090909 0%, #0f0f0f 100%);
+            color: #f0f0f0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .section-label { font-size: 0.75rem; letter-spacing: 4px; text-transform: uppercase; color: #888; margin-bottom: 12px; }
+        .section-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.08; margin-bottom: 18px; }
+        .section-subtitle { font-size: 1.05rem; color: #aaa; max-width: 760px; }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 14px 26px; border-radius: 999px; font-weight: 700; font-size: 0.95rem;
+            transition: all 0.25s ease; cursor: pointer; border: 1px solid transparent;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: #fff; color: #0a0a0a; }
+        .btn-outline { background: transparent; border-color: rgba(255,255,255,0.2); color: #fff; }
+        .btn-success { background: #1db954; color: #08110b; }
+        .btn-success:hover { background: #28d764; }
+        .btn-danger { background: #ff4d4d; color: #fff; }
+        .btn-danger:hover { background: #ff6666; }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 20px 0;
+            transition: background 0.4s ease, padding 0.4s ease;
+            background: rgba(10,10,10,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        nav.scrolled { padding: 12px 0; }
+        nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo { font-weight: 800; font-size: 1.4rem; letter-spacing: 2px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { font-size: 0.85rem; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #aaa; transition: color 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: #fff; }
+        .nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+        .nav-toggle span { display: block; width: 26px; height: 2px; background: #fff; border-radius: 2px; }
+
+        .hero { padding: 150px 0 42px; }
+        .hero-grid { display: grid; grid-template-columns: 1fr; gap: 28px; align-items: stretch; }
+        .hero-card, .status-card, .player-shell, .info-card, .timeline-card, .faq-card, .cta-card {
+            background: #141414;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 24px;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+        }
+        .hero-card, .status-card, .player-shell, .info-card, .timeline-card, .faq-card, .cta-card { padding: 30px; }
+        .hero-card {
+            text-align: center;
+            padding: 42px 34px 36px;
+        }
+        .hero-card .section-subtitle {
+            margin: 0 auto;
+        }
+        .pills { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .hero-card .pills { justify-content: center; }
+        .pill {
+            display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 999px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #d3d3d3; font-size: 0.82rem;
+        }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; justify-content: center; }
+        .status-card { display: grid; gap: 18px; }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 999px;
+            width: fit-content; font-size: 0.88rem; font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+        .status-badge.live { background: rgba(255,77,77,0.14); color: #ff9d9d; border-color: rgba(255,77,77,0.28); }
+        .status-badge.starting { background: rgba(255,180,0,0.12); color: #ffd77a; border-color: rgba(255,180,0,0.22); }
+        .status-badge.offline { background: rgba(255,255,255,0.06); color: #d0d0d0; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+        .stat-list { display: grid; gap: 14px; }
+        .stat-item {
+            padding: 16px 18px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+        }
+        .stat-item span { display: block; font-size: 0.74rem; letter-spacing: 2px; text-transform: uppercase; color: #777; margin-bottom: 8px; }
+        .stat-item strong { display: block; margin-bottom: 6px; }
+        .stat-item p { color: #a8a8a8; font-size: 0.92rem; }
+
+        .stream-section { padding: 0 0 110px; }
+        .stream-layout { display: grid; gap: 24px; }
+        .player-shell h2, .info-card h2, .timeline-card h2, .faq-card h2, .cta-card h2 { font-size: 1.4rem; margin-bottom: 10px; }
+        .player-shell p, .info-card p, .timeline-card p, .faq-card p, .cta-card p { color: #a6a6a6; }
+        .player-shell {
+            padding: 34px;
+        }
+        .player-shell .section-label,
+        .player-shell h2,
+        .player-shell > p {
+            text-align: center;
+        }
+
+        .player-frame {
+            margin-top: 18px;
+            aspect-ratio: 16 / 9;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #101010, #070707);
+            border: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+            width: 100%;
+            min-height: 420px;
+        }
+        .player-frame video,
+        .player-frame iframe {
+            width: 100%;
+            height: 100%;
+            display: none;
+            border: 0;
+            background: #000;
+        }
+        .player-frame.ready-video video { display: block; }
+        .player-frame.ready-embed iframe { display: block; }
+        .player-placeholder {
+            position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 32px;
+        }
+        .player-frame.ready-video .player-placeholder,
+        .player-frame.ready-embed .player-placeholder { display: none; }
+        .placeholder-inner { max-width: 520px; }
+        .placeholder-kicker {
+            display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); color: #d2d2d2; font-size: 0.82rem;
+            margin-bottom: 16px;
+        }
+        .placeholder-inner strong { display: block; color: #fff; font-size: 1.35rem; margin-bottom: 10px; }
+        .placeholder-inner span { color: #a6a6a6; }
+        .player-meta {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px;
+        }
+        .capture-controls {
+            display: grid;
+            gap: 18px;
+            margin: 18px auto 0;
+        }
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+        .control-group {
+            padding: 18px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            text-align: left;
+        }
+        .control-group h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .control-group p {
+            color: #a6a6a6;
+            font-size: 0.92rem;
+            margin-bottom: 14px;
+        }
+        .device-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+        .capture-select {
+            flex: 1 1 220px;
+            min-width: 0;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: #101010;
+            color: #fff;
+            font: inherit;
+        }
+        .capture-status {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #d8d8d8;
+            text-align: center;
+        }
+        .meta-box {
+            padding: 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+        }
+        .go-live-note {
+            margin-top: 12px;
+            color: #c9c9c9;
+            font-size: 0.9rem;
+        }
+        .meta-box span { display: block; color: #777; text-transform: uppercase; letter-spacing: 2px; font-size: 0.72rem; margin-bottom: 8px; }
+        .meta-box strong { display: block; font-size: 0.98rem; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 24px;
+        }
+        .info-card ul, .timeline-card ul { margin-top: 14px; padding-left: 18px; color: #c4c4c4; }
+        .info-card li + li, .timeline-card li + li { margin-top: 8px; }
+        .timeline-list { display: grid; gap: 14px; margin-top: 16px; }
+        .timeline-item {
+            padding: 16px 18px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+        }
+        .timeline-item strong { display: block; margin-bottom: 6px; }
+        .faq-list { display: grid; gap: 14px; margin-top: 16px; }
+        .faq-item {
+            padding: 18px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+        }
+        .faq-item strong { display: block; margin-bottom: 8px; }
+        .cta-card { text-align: center; }
+        .cta-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 22px; }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 6px; color: #fff;
+        }
+
+        footer { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; color: #555; font-size: 0.85rem; }
+        footer span { color: #888; }
+
+        @media (max-width: 980px) {
+            .hero-grid, .player-meta, .control-grid, .info-grid { grid-template-columns: 1fr; }
+            .player-frame { min-height: 320px; }
+            .device-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 860px) {
+            .nav-links {
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #111;
+                flex-direction: column; padding: 80px 40px 40px; gap: 24px; transition: right 0.4s ease;
+                border-left: 1px solid rgba(255,255,255,0.06);
+            }
+            .nav-links.open { right: 0; }
+            .nav-toggle { display: flex; }
+            .hero { padding-top: 136px; }
+            .hero-card, .status-card, .player-shell, .info-card, .timeline-card, .faq-card, .cta-card { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-logo">BUOYS</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="library.html">Library</a>
+                <a href="live.html" class="active">Live Stream</a>
+                <a href="gallery.html">Gallery</a>
+                <a href="contact.html">Contact</a>
+                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.8rem;">Facebook</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-card">
+                    <div class="pills">
+                        <div class="pill">Viewer-safe public page</div>
+                        <div class="pill">Stream-day ready</div>
+                        <div class="pill">No operator controls exposed</div>
+                    </div>
+                    <p class="section-label">Live Stream</p>
+                    <h1 class="section-title">Streaming from studio</h1>
+                    <p class="section-subtitle">This page is prepared for public livestream viewing only. It keeps the audience experience front and center while the technical stream setup stays private and offline with the crew.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stream-section" id="watch">
+        <div class="container">
+            <div class="stream-layout">
+                <div class="player-shell">
+                    <p class="section-label">Main Session</p>
+                    <h2>Streaming from studio</h2>
+                    <p>This is the main live session area. Start your webcam and microphone here to fill the wide-screen studio window.</p>
+
+                    <div class="player-frame" id="playerFrame">
+                        <video id="streamVideo" controls playsinline autoplay muted></video>
+                        <iframe id="streamEmbed" title="Buoys live stream" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                        <div class="player-placeholder" id="playerPlaceholder">
+                            <div class="placeholder-inner">
+                                <div class="placeholder-kicker">Studio session window</div>
+                                <strong id="placeholderTitle">Start your mic and webcam session</strong>
+                                <span id="placeholderText">Use the button above to activate your Mac webcam and microphone directly in this page. If a public playback or embed URL is provided, it can still appear here instead.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="capture-controls">
+                        <div class="control-grid">
+                            <div class="control-group">
+                                <h3>Studio devices</h3>
+                                <p>Choose which camera and microphone should be used for the studio session in this browser.</p>
+                                <div class="device-grid">
+                                    <select id="videoSource" class="capture-select" aria-label="Camera device"></select>
+                                    <select id="audioSource" class="capture-select" aria-label="Microphone device"></select>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <h3>Session controls</h3>
+                                <p>Use these controls only for the local webcam and microphone preview running in this browser.</p>
+                                <div class="action-row">
+                                    <button class="btn btn-primary" id="startPreviewBtn" type="button">Start Mic + Webcam Session</button>
+                                    <button class="btn btn-outline" id="stopPreviewBtn" type="button" disabled>Stop Session</button>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <h3>OnAir controls</h3>
+                                <p>Use the classic live broadcast controls separately from the local preview session.</p>
+                                <div class="action-row">
+                                    <button class="btn btn-success" id="liveToggleBtn" type="button">Off Air</button>
+                                </div>
+                                <div class="go-live-note" id="goLiveNote">The Off Air / On Air control is a viewer-facing broadcast state toggle. Backend publishing still needs to be wired in for real public streaming.</div>
+                            </div>
+                        </div>
+
+                        <div class="capture-status" id="deviceStatus">Ready. Choose your devices and click <strong>Start Mic + Webcam</strong> to begin a local session in this browser.</div>
+
+                        <div class="status-card" id="status">
+                            <div class="status-badge offline" id="statusBadge"><span class="dot"></span><span id="statusLabel">Stream page ready</span></div>
+                            <div class="stat-list">
+                                <div class="stat-item">
+                                    <span>Public status</span>
+                                    <strong id="headlineText">Waiting for the next broadcast.</strong>
+                                    <p id="supportingText">As soon as the live playback feed is published, this page can host the viewer stream without revealing internal setup details.</p>
+                                </div>
+                                <div class="stat-item">
+                                    <span>What’s ready</span>
+                                    <strong>Audience-facing layout and player area.</strong>
+                                    <p>The stream page now includes a dedicated watch section, livestream messaging, and clear calls to action for fans.</p>
+                                </div>
+                                <div class="stat-item">
+                                    <span>What stays private</span>
+                                    <strong>All operator workflow and credentials.</strong>
+                                    <p>Admin token handling, stream preparation, ingest details, and internal checks remain in <code>wiki/how2live.html</code> only.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="player-meta">
+                        <div class="meta-box">
+                            <span>Format</span>
+                            <strong id="formatValue">Studio live session</strong>
+                        </div>
+                        <div class="meta-box">
+                            <span>Next show</span>
+                            <strong id="nextShowValue">To be announced</strong>
+                        </div>
+                        <div class="meta-box">
+                            <span>Backup watch link</span>
+                            <strong><a id="backupLink" href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" rel="noopener noreferrer">Facebook updates</a></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card" id="schedule">
+                        <p class="section-label">Before You Watch</p>
+                        <h2>What to expect</h2>
+                        <p>Built from the internal live workflow, this public page is now focused on the audience experience and the actual moment of broadcast.</p>
+                        <ul>
+                            <li>Join a few minutes early if you want to catch the stream from the start.</li>
+                            <li>Use headphones or speakers — the stream is designed around the studio master mix.</li>
+                            <li>If the player is not active yet, check the fallback public link for updates.</li>
+                        </ul>
+                    </div>
+
+                    <div class="timeline-card">
+                        <p class="section-label">Run of Show</p>
+                        <h2>Stream-day flow</h2>
+                        <div class="timeline-list">
+                            <div class="timeline-item">
+                                <strong>T-30 to T-15</strong>
+                                <p>The crew performs technical checks, confirms audio, framing, and connectivity off the public page.</p>
+                            </div>
+                            <div class="timeline-item">
+                                <strong>T-05</strong>
+                                <p>The playback experience is checked one last time so viewers can join smoothly when the stream opens.</p>
+                            </div>
+                            <div class="timeline-item">
+                                <strong>LIVE</strong>
+                                <p>The broadcast goes public here, with the audience player and any viewer-safe external watch link ready.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cta-card">
+                        <p class="section-label">Stay Connected</p>
+                        <h2>Follow the next live session</h2>
+                        <p>For stream announcements, last-minute changes, and public watch updates, keep an eye on Buoys online.</p>
+                        <div class="cta-actions">
+                            <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Follow on Facebook</a>
+                            <a href="contact.html" class="btn btn-outline">Contact Buoys</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-card">
+                    <p class="section-label">FAQ</p>
+                    <h2>Quick answers for listeners</h2>
+                    <div class="faq-list">
+                        <div class="faq-item">
+                            <strong>Will this page always host the stream?</strong>
+                            <p>That’s the goal. The player section is prepared so the public livestream can live here once the playback destination is finalized.</p>
+                        </div>
+                        <div class="faq-item">
+                            <strong>Why isn’t the technical setup shown here anymore?</strong>
+                            <p>Because livestream operations belong to the crew only. Public pages should show viewing information, not private workflow or stream controls.</p>
+                        </div>
+                        <div class="faq-item">
+                            <strong>Where should I go if this stream is offline?</strong>
+                            <p>Use the fallback public link and social updates while the next show is being announced or the stream is preparing to start.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 <span>Buoys</span>. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <template id="operator-note-template">
+        <!--
+            INTERNAL OPERATOR NOTE TEMPLATE — REMOVE BEFORE PUBLIC DEPLOY IF NOT NEEDED
+
+            Purpose:
+            - Temporary reminder block for the crew during stream-day prep.
+            - Keep this hidden from the rendered page and do not convert it into visible public content.
+
+            Suggested temporary notes:
+            - Stream status query: ?status=starting or ?status=live
+            - Public playback query: ?playback=https://PUBLIC-PLAYBACK-URL
+            - Public embed query: ?embed=https://PUBLIC-EMBED-URL
+            - Preferred audio path: mixer REC OUT -> interface -> OBS Audio Input Capture
+            - Webcam path: USB webcam -> OBS Video Capture Device
+            - Before going live: mute laptop/webcam mic if studio mix is the real source
+
+            If you use this template operationally, copy the note into a private wiki page instead of leaving it here long-term.
+        -->
+    </template>
+
+    <script>
+        const STREAM_CONFIG = {
+            status: 'offline',
+            title: 'Buoys Studio Session',
+            nextShow: 'To be announced',
+            playbackUrl: '',
+            embedUrl: '',
+            fallbackWatchUrl: 'https://www.facebook.com/profile.php?id=61584378587992'
+        };
+
+        const query = new URLSearchParams(window.location.search);
+        const resolvedConfig = {
+            ...STREAM_CONFIG,
+            status: query.get('status') || STREAM_CONFIG.status,
+            title: query.get('title') || STREAM_CONFIG.title,
+            nextShow: query.get('next') || STREAM_CONFIG.nextShow,
+            playbackUrl: query.get('playback') || STREAM_CONFIG.playbackUrl,
+            embedUrl: query.get('embed') || STREAM_CONFIG.embedUrl,
+            fallbackWatchUrl: query.get('fallback') || STREAM_CONFIG.fallbackWatchUrl
+        };
+
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 60);
+        });
+
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinks.classList.remove('open'));
+        });
+
+        const statusBadge = document.getElementById('statusBadge');
+        const statusLabel = document.getElementById('statusLabel');
+        const headlineText = document.getElementById('headlineText');
+        const supportingText = document.getElementById('supportingText');
+        const placeholderTitle = document.getElementById('placeholderTitle');
+        const placeholderText = document.getElementById('placeholderText');
+        const nextShowValue = document.getElementById('nextShowValue');
+        const backupLink = document.getElementById('backupLink');
+        const formatValue = document.getElementById('formatValue');
+        const playerFrame = document.getElementById('playerFrame');
+        const streamVideo = document.getElementById('streamVideo');
+        const streamEmbed = document.getElementById('streamEmbed');
+        const videoSource = document.getElementById('videoSource');
+        const audioSource = document.getElementById('audioSource');
+        const startPreviewBtn = document.getElementById('startPreviewBtn');
+        const stopPreviewBtn = document.getElementById('stopPreviewBtn');
+        const deviceStatus = document.getElementById('deviceStatus');
+        const liveToggleBtn = document.getElementById('liveToggleBtn');
+        const goLiveNote = document.getElementById('goLiveNote');
+
+        let currentPreviewStream = null;
+        let liveStreamingActive = false;
+
+        function setDeviceStatus(message) {
+            deviceStatus.innerHTML = message;
+        }
+
+        async function populateDevices() {
+            if (!navigator.mediaDevices?.enumerateDevices) {
+                setDeviceStatus('This browser does not support media device selection.');
+                return;
+            }
+
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videos = devices.filter(device => device.kind === 'videoinput');
+                const audios = devices.filter(device => device.kind === 'audioinput');
+
+                videoSource.innerHTML = videos.map((device, index) =>
+                    `<option value="${device.deviceId}">${device.label || `Camera ${index + 1}`}</option>`
+                ).join('');
+
+                audioSource.innerHTML = audios.map((device, index) =>
+                    `<option value="${device.deviceId}">${device.label || `Microphone ${index + 1}`}</option>`
+                ).join('');
+            } catch (error) {
+                setDeviceStatus(`Could not load devices: ${error.message}`);
+            }
+        }
+
+        function stopCurrentPreview() {
+            if (!currentPreviewStream) return;
+            currentPreviewStream.getTracks().forEach(track => track.stop());
+            currentPreviewStream = null;
+            streamVideo.srcObject = null;
+            streamVideo.removeAttribute('src');
+            streamVideo.load();
+            playerFrame.classList.remove('ready-video');
+        }
+
+        async function startLocalSession() {
+            if (!navigator.mediaDevices?.getUserMedia) {
+                setDeviceStatus('This browser does not support webcam/microphone capture.');
+                return;
+            }
+
+            try {
+                stopCurrentPreview();
+
+                const constraints = {
+                    video: videoSource.value ? { deviceId: { exact: videoSource.value } } : true,
+                    audio: audioSource.value ? { deviceId: { exact: audioSource.value } } : true
+                };
+
+                setDeviceStatus('Requesting webcam and microphone access...');
+                currentPreviewStream = await navigator.mediaDevices.getUserMedia(constraints);
+                streamVideo.srcObject = currentPreviewStream;
+                streamVideo.muted = true;
+                playerFrame.classList.add('ready-video');
+                playerFrame.classList.remove('ready-embed');
+                startPreviewBtn.disabled = true;
+                stopPreviewBtn.disabled = false;
+                formatValue.textContent = 'Local webcam + mic session';
+                setDeviceStatus('Session live in this browser. Your Mac webcam and microphone are active.');
+                await populateDevices();
+            } catch (error) {
+                setDeviceStatus(`Could not start session: ${error.message}. Check browser and macOS camera/microphone permissions.`);
+            }
+        }
+
+        function stopLocalSession() {
+            stopCurrentPreview();
+            startPreviewBtn.disabled = false;
+            stopPreviewBtn.disabled = true;
+            formatValue.textContent = 'Public playback only';
+            setDeviceStatus('Session stopped.');
+        }
+
+        function setLiveButtonState(isActive) {
+            liveStreamingActive = isActive;
+            if (isActive) {
+                liveToggleBtn.classList.remove('btn-success');
+                liveToggleBtn.classList.add('btn-danger');
+                liveToggleBtn.textContent = 'On Air';
+            } else {
+                liveToggleBtn.classList.remove('btn-danger');
+                liveToggleBtn.classList.add('btn-success');
+                liveToggleBtn.textContent = 'Off Air';
+            }
+        }
+
+        function toggleLiveStreaming() {
+            if (!liveStreamingActive) {
+                if (!currentPreviewStream) {
+                    setDeviceStatus('Start the mic + webcam session first, then begin live streaming.');
+                    goLiveNote.textContent = 'You need an active local session before going On Air. Start the camera/mic session first.';
+                    return;
+                }
+
+                setLiveButtonState(true);
+                setDeviceStatus('Local session is active. Live streaming mode has been armed from this page.');
+                goLiveNote.textContent = 'On Air mode is ON. Click again to return to Off Air. Backend publishing still needs to be wired in for real public streaming.';
+                statusBadge.classList.remove('offline', 'starting');
+                statusBadge.classList.add('live');
+                statusLabel.textContent = 'Live streaming active';
+                return;
+            }
+
+            setLiveButtonState(false);
+            setDeviceStatus('Live streaming mode stopped. Local camera/mic session can still remain active until you stop it.');
+            goLiveNote.textContent = 'Off Air mode is active. You can keep the local preview running or go On Air again when ready.';
+            statusBadge.classList.remove('live');
+            statusBadge.classList.add('offline');
+            statusLabel.textContent = 'Stream page ready';
+        }
+
+        nextShowValue.textContent = resolvedConfig.nextShow;
+        backupLink.href = resolvedConfig.fallbackWatchUrl;
+
+        const statusMap = {
+            live: {
+                badgeClass: 'live',
+                label: 'Live now',
+                headline: `${resolvedConfig.title} is on air.`,
+                support: 'Join the stream below and keep the fallback link handy in case you need updates.',
+                placeholderTitle: 'The live stream is starting',
+                placeholderText: 'If the player does not load immediately, refresh the page or use the public fallback link.'
+            },
+            starting: {
+                badgeClass: 'starting',
+                label: 'Starting soon',
+                headline: `${resolvedConfig.title} is nearly live.`,
+                support: 'The public page is ready and the playback window will switch on as soon as the broadcast opens.',
+                placeholderTitle: 'We’re nearly ready',
+                placeholderText: 'Stay on this page — the stream slot is prepared and the player can be enabled as soon as the crew goes live.'
+            },
+            offline: {
+                badgeClass: 'offline',
+                label: 'Stream page ready',
+                headline: 'Waiting for the next broadcast.',
+                support: 'As soon as the live playback feed is published, this page can host the viewer stream without revealing internal setup details.',
+                placeholderTitle: 'We’ll be live here soon',
+                placeholderText: 'The page is ready for the stream-day playback link. When a public embed URL or playback URL is added below, this area becomes the audience player.'
+            }
+        };
+
+        const currentStatus = statusMap[resolvedConfig.status] || statusMap.offline;
+        statusBadge.classList.remove('live', 'starting', 'offline');
+        statusBadge.classList.add(currentStatus.badgeClass);
+        statusLabel.textContent = currentStatus.label;
+        headlineText.textContent = currentStatus.headline;
+        supportingText.textContent = currentStatus.support;
+        if (!currentPreviewStream) {
+            placeholderTitle.textContent = currentStatus.placeholderTitle;
+            placeholderText.textContent = currentStatus.placeholderText;
+        }
+
+        if (resolvedConfig.embedUrl) {
+            streamEmbed.src = resolvedConfig.embedUrl;
+            playerFrame.classList.add('ready-embed');
+            formatValue.textContent = 'Embedded public player';
+        } else if (resolvedConfig.playbackUrl) {
+            streamVideo.src = resolvedConfig.playbackUrl;
+            playerFrame.classList.add('ready-video');
+            formatValue.textContent = 'Direct playback URL';
+        }
+
+        startPreviewBtn.addEventListener('click', startLocalSession);
+        stopPreviewBtn.addEventListener('click', stopLocalSession);
+        liveToggleBtn.addEventListener('click', toggleLiveStreaming);
+
+        setLiveButtonState(false);
+
+        if (navigator.mediaDevices?.addEventListener) {
+            navigator.mediaDevices.addEventListener('devicechange', populateDevices);
+        }
+
+        populateDevices();
+    </script>
+</body>
+</html>

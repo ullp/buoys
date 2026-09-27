@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buoys Operator Console — Internal</title>
+    <style>
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            background: #0f0f0f;
+            color: #f2f2f2;
+            line-height: 1.6;
+        }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 42px 24px 96px; }
+        h1, h2, h3 { line-height: 1.15; }
+        h1 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 12px; }
+        h2 { margin-top: 34px; font-size: 1.45rem; }
+        h3 { margin-top: 18px; font-size: 1.05rem; }
+        p, li, label { color: #d2d2d2; }
+        .lead { color: #aaa; max-width: 820px; }
+        .panel {
+            margin-top: 18px;
+            padding: 20px;
+            border-radius: 18px;
+            background: #171717;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .warn { border-color: rgba(255,77,77,0.25); background: rgba(255,77,77,0.08); }
+        .ok { border-color: rgba(29,185,84,0.25); background: rgba(29,185,84,0.08); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .stack { display: grid; gap: 14px; }
+        .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 12px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14);
+            background: #fff; color: #111; font-weight: 700; cursor: pointer;
+        }
+        .btn.secondary { background: transparent; color: #fff; }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        textarea, input {
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: #101010;
+            color: #fff;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font: inherit;
+        }
+        select {
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: #101010;
+            color: #fff;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font: inherit;
+        }
+        textarea { min-height: 84px; resize: vertical; }
+        .checks { display: grid; gap: 10px; margin-top: 10px; }
+        .checks label { display: flex; gap: 10px; align-items: flex-start; }
+        .checks input[type="checkbox"] { width: auto; margin-top: 4px; }
+        .preview {
+            margin-top: 16px;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #000;
+            object-fit: cover;
+        }
+        .status {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #d8d8d8;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 6px; color: #fff;
+        }
+        .small { color: #9a9a9a; font-size: 0.94rem; }
+        @media (max-width: 780px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>Buoys Operator Console</h1>
+        <p class="lead">Internal helper page for stream-day operation. This page is for the crew only. Do not link it from the public site and do not deploy it with public-facing viewer pages.</p>
+
+        <div class="panel warn">
+            <strong>Keep private:</strong>
+            <ul>
+                <li>Do not paste real secrets into a public page.</li>
+                <li>Do not expose stream key, admin token, or ingest details to viewers.</li>
+                <li>Use this as a checklist and operator memory aid, not as a public broadcast page.</li>
+            </ul>
+        </div>
+
+        <div class="grid">
+            <div class="panel ok">
+                <h2>0. Browser webcam + mic quick start</h2>
+                <p>This gives you a simple browser button to activate your Mac webcam and microphone for preview/testing. It is useful for quick capture and permission checks before or alongside OBS.</p>
+                <div class="stack">
+                    <label>
+                        Camera device
+                        <select id="videoSource"></select>
+                    </label>
+                    <label>
+                        Microphone device
+                        <select id="audioSource"></select>
+                    </label>
+                </div>
+                <div class="controls">
+                    <button class="btn" id="startPreviewBtn" type="button">Start Webcam + Mic</button>
+                    <button class="btn secondary" id="stopPreviewBtn" type="button" disabled>Stop Preview</button>
+                </div>
+                <video id="preview" class="preview" autoplay playsinline muted></video>
+                <div class="status" id="deviceStatus">Idle. Click <strong>Start Webcam + Mic</strong> to request browser access and preview your devices.</div>
+                <p class="small">Note: this starts local browser capture and preview. It does <strong>not</strong> replace OBS streaming output to the live backend, but it gives you the button you asked for and confirms the webcam/microphone are working on this Mac.</p>
+            </div>
+
+            <div class="panel">
+                <h2>1. Inputs to confirm</h2>
+                <div class="checks">
+                    <label><input type="checkbox"> Webcam connected and visible in OBS.</label>
+                    <label><input type="checkbox"> Studio feed connected via <code>REC OUT</code>, <code>MAIN OUT</code>, or mixer USB.</label>
+                    <label><input type="checkbox"> Wrong microphones muted or removed in OBS.</label>
+                    <label><input type="checkbox"> OBS meters show healthy signal around <code>-12 dB</code> to <code>-6 dB</code>.</label>
+                    <label><input type="checkbox"> No clipping, distortion, or accidental echo.</label>
+                </div>
+            </div>
+
+            <div class="panel ok">
+                <h2>2. OBS quick setup</h2>
+                <ol>
+                    <li>Create/open scene <code>Buoys Live</code>.</li>
+                    <li>Add <code>Video Capture Device</code> → webcam.</li>
+                    <li>Add <code>Audio Input Capture</code> → interface or mixer USB.</li>
+                    <li>Mute built-in or webcam mic if not needed.</li>
+                    <li>Open <strong>Settings → Stream</strong> and paste server / key.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="panel">
+                <h2>3. Copy-paste workspace</h2>
+                <div class="stack">
+                    <label>
+                        API base URL
+                        <input type="text" placeholder="https://...execute-api.../v1">
+                    </label>
+                    <label>
+                        Public playback URL
+                        <input type="text" placeholder="https://viewer-playback-url-or-player-link">
+                    </label>
+                    <label>
+                        OBS ingest server / stream URL
+                        <input type="text" placeholder="rtmps://.../app/">
+                    </label>
+                    <label>
+                        Stream title / show label
+                        <input type="text" placeholder="Buoys Studio Session">
+                    </label>
+                </div>
+                <p class="small">Leave secrets in your password manager or protected backend flow when possible. Avoid storing live tokens in plain files.</p>
+            </div>
+
+            <div class="panel">
+                <h2>4. Stream-day notes</h2>
+                <label>
+                    Operator notes
+                    <textarea placeholder="Example: camera 2 slightly soft focus; use REC OUT not main out; Facebook fallback link pinned."></textarea>
+                </label>
+                <div class="checks">
+                    <label><input type="checkbox"> Public <code>live.html</code> updated to <code>?status=starting</code> or <code>?status=live</code>.</label>
+                    <label><input type="checkbox"> Public playback / embed link tested.</label>
+                    <label><input type="checkbox"> First minute monitored end-to-end.</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>5. Step-by-step launch checklist</h2>
+            <ol>
+                <li>Power, internet, camera, and studio audio path verified.</li>
+                <li>Open OBS and confirm webcam framing and exposure.</li>
+                <li>Confirm studio audio source is correct and other mics are muted.</li>
+                <li>Prepare the backend session using the private workflow from <code>how2live.html</code>.</li>
+                <li>Paste ingest details into OBS stream settings.</li>
+                <li>Set public page to starting soon or live.</li>
+                <li>Click <strong>Start Streaming</strong> in OBS.</li>
+                <li>Confirm the public playback page is working.</li>
+                <li>Monitor the first minute closely for audio or sync issues.</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const videoSource = document.getElementById('videoSource');
+        const audioSource = document.getElementById('audioSource');
+        const startPreviewBtn = document.getElementById('startPreviewBtn');
+        const stopPreviewBtn = document.getElementById('stopPreviewBtn');
+        const preview = document.getElementById('preview');
+        const deviceStatus = document.getElementById('deviceStatus');
+
+        let currentStream = null;
+
+        function setStatus(message) {
+            deviceStatus.innerHTML = message;
+        }
+
+        async function populateDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videos = devices.filter(device => device.kind === 'videoinput');
+                const audios = devices.filter(device => device.kind === 'audioinput');
+
+                videoSource.innerHTML = videos.map((device, index) =>
+                    `<option value="${device.deviceId}">${device.label || `Camera ${index + 1}`}</option>`
+                ).join('');
+
+                audioSource.innerHTML = audios.map((device, index) =>
+                    `<option value="${device.deviceId}">${device.label || `Microphone ${index + 1}`}</option>`
+                ).join('');
+            } catch (error) {
+                setStatus(`Could not read media devices: ${error.message}`);
+            }
+        }
+
+        function stopCurrentStream() {
+            if (!currentStream) return;
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+            preview.srcObject = null;
+        }
+
+        async function startPreview() {
+            try {
+                stopCurrentStream();
+
+                const constraints = {
+                    video: videoSource.value ? { deviceId: { exact: videoSource.value } } : true,
+                    audio: audioSource.value ? { deviceId: { exact: audioSource.value } } : true
+                };
+
+                setStatus('Requesting camera and microphone access...');
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                preview.srcObject = currentStream;
+                startPreviewBtn.disabled = true;
+                stopPreviewBtn.disabled = false;
+                setStatus('Preview live. Your webcam and microphone are active in the browser. If this works, your Mac devices are available for OBS too.');
+
+                await populateDevices();
+            } catch (error) {
+                setStatus(`Could not start webcam/microphone: ${error.message}. Check browser permissions in macOS and try again.`);
+            }
+        }
+
+        function stopPreview() {
+            stopCurrentStream();
+            startPreviewBtn.disabled = false;
+            stopPreviewBtn.disabled = true;
+            setStatus('Preview stopped.');
+        }
+
+        startPreviewBtn.addEventListener('click', startPreview);
+        stopPreviewBtn.addEventListener('click', stopPreview);
+
+        if (navigator.mediaDevices?.addEventListener) {
+            navigator.mediaDevices.addEventListener('devicechange', populateDevices);
+        }
+
+        populateDevices();
+    </script>
+</body>
+</html>

@@ -21,3 +21,12 @@ cloudfront_private_key_ssm_path = "/buoys/cloudfront-private-key"
 
 # AWS region
 aws_region = "eu-west-1"
+
+# Shared secret used by the website admin to request live broadcast credentials.
+# Keep this private. The same value must be entered on the live page before starting a cast.
+live_admin_token = "replace-with-a-long-random-secret"
+
+# Amazon IVS stream key value.
+# Create the IVS channel with Terraform first, then create a stream key in AWS for that channel,
+# and paste the key value here before applying again.
+live_stream_key = "paste-the-ivs-stream-key-value-here"
