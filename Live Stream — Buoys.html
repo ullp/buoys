@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<!-- saved from url=(0038)file:///Users/ullp/git/buoys/live.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Stream — Buoys</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./Live Stream — Buoys_files/css2" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; overflow-y: scroll; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #f0f0f0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        a { color: inherit; text-decoration: none; }
+        ul { list-style: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .section-label { font-size: 0.75rem; letter-spacing: 4px; text-transform: uppercase; color: #888; margin-bottom: 12px; }
+        .section-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 24px; }
+        .section-subtitle { font-size: 1.05rem; color: #aaa; max-width: 760px; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px; padding: 14px 32px; border-radius: 50px;
+            font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; cursor: pointer; border: none;
+        }
+        .btn-primary { background: #fff; color: #0a0a0a; }
+        .btn-primary:hover { background: #ddd; transform: translateY(-2px); }
+        .btn-outline { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.3); }
+        .btn-outline:hover { border-color: #fff; background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 20px 0;
+            transition: background 0.4s ease, padding 0.4s ease; background: rgba(10,10,10,0.92);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo { font-weight: 800; font-size: 1.4rem; letter-spacing: 2px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { font-size: 0.85rem; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; color: #aaa; transition: color 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: #fff; }
+        .nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+        .nav-toggle span { display: block; width: 26px; height: 2px; background: #fff; transition: all 0.3s; border-radius: 2px; }
+
+        .page-hero {
+            padding: 160px 0 80px;
+            background: radial-gradient(circle at top, rgba(29,185,84,0.18), transparent 35%), linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%);
+            text-align: center;
+        }
+        .page-hero .section-subtitle { margin: 0 auto 36px; }
+        .hero-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+        .stream-layout { padding: 0 0 120px; }
+        .stream-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px; }
+        .panel, .tool-card, .step-card {
+            background: #141414; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+        }
+        .panel { padding: 32px; }
+        .panel + .panel { margin-top: 24px; }
+        .lead-list { display: grid; gap: 14px; margin-top: 24px; }
+        .lead-list li {
+            padding: 16px 18px; border-radius: 12px; background: rgba(255,255,255,0.03); color: #bbb;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .lead-list strong { color: #fff; }
+
+        .signal-flow {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 28px;
+        }
+        .flow-box {
+            padding: 18px; border-radius: 14px; background: linear-gradient(180deg, #181818, #121212);
+            border: 1px solid rgba(255,255,255,0.07); min-height: 140px;
+        }
+        .flow-box span { display: inline-block; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: #777; margin-bottom: 10px; }
+        .flow-box h3 { font-size: 1rem; margin-bottom: 8px; }
+        .flow-box p { color: #999; font-size: 0.92rem; }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+            background: rgba(29,185,84,0.12); color: #9ff0be; border: 1px solid rgba(29,185,84,0.22); font-size: 0.82rem; margin-bottom: 18px;
+        }
+        .tools-grid, .steps-grid { display: grid; gap: 18px; }
+        .tool-card, .step-card { padding: 24px; }
+        .tool-card h3, .step-card h3 { margin-bottom: 10px; font-size: 1.1rem; }
+        .tool-card p, .step-card p { color: #999; }
+        .tool-card ul, .step-card ul { margin-top: 12px; display: grid; gap: 8px; color: #bbb; padding-left: 18px; list-style: disc; }
+        .tool-card.recommended { border-color: rgba(29,185,84,0.35); box-shadow: 0 0 0 1px rgba(29,185,84,0.12) inset; }
+
+        .stack-note {
+            padding: 24px; border-radius: 16px; background: #101010; border: 1px solid rgba(255,255,255,0.06); color: #bbb;
+        }
+        .stack-note strong { color: #fff; }
+
+        footer { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; color: #555; font-size: 0.85rem; }
+        footer span { color: #888; }
+
+        @media (max-width: 980px) {
+            .stream-grid, .signal-flow { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #111;
+                flex-direction: column; padding: 80px 40px 40px; gap: 24px; transition: right 0.4s ease;
+                border-left: 1px solid rgba(255,255,255,0.06);
+            }
+            .nav-links.open { right: 0; }
+            .nav-toggle { display: flex; }
+            .panel, .tool-card, .step-card { padding: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <div class="container">
+            <a href="file:///Users/ullp/git/buoys/index.html" class="nav-logo">BUOYS</a>
+            <div class="nav-links" id="navLinks">
+                <a href="file:///Users/ullp/git/buoys/index.html">Home</a>
+                <a href="file:///Users/ullp/git/buoys/about.html">About</a>
+                <a href="file:///Users/ullp/git/buoys/library.html">Library</a>
+                <a href="file:///Users/ullp/git/buoys/live.html" class="active">Live Stream</a>
+                <a href="file:///Users/ullp/git/buoys/gallery.html">Gallery</a>
+                <a href="file:///Users/ullp/git/buoys/contact.html">Contact</a>
+                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.8rem;">Facebook</a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="page-hero">
+        <div class="container">
+            <p class="section-label">Live Stream</p>
+            <h1 class="section-title">Broadcast Directly From Our Studio Master Mix</h1>
+            <p class="section-subtitle">This section maps out the best free or low-cost connection path using OBS, Radio Caster, Icecast, Radio Boost, and Mixcloud so we can take the studio master output live with minimal friction.</p>
+            <div class="hero-actions">
+                <a href="file:///Users/ullp/git/buoys/live.html#setup" class="btn btn-primary">View Recommended Setup</a>
+                <a href="file:///Users/ullp/git/buoys/live.html#tools" class="btn btn-outline">Compare Streaming Tools</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="stream-layout" id="setup">
+        <div class="container">
+            <div class="stream-grid">
+                <div>
+                    <div class="panel">
+                        <div class="badge">Recommended free chain for studio streaming</div>
+                        <h2 class="section-title" style="font-size: clamp(1.8rem, 4vw, 2.6rem);">Best Connection Path</h2>
+                        <p class="section-subtitle" style="max-width: 100%;">The cleanest approach is to take the master mix from your audio interface into OBS, send it through Radio Caster or OBS-compatible streaming output to an Icecast server, and optionally relay or promote the stream through Radio Boost while archiving or publishing long-form sessions on Mixcloud.</p>
+
+                        <div class="signal-flow">
+                            <div class="flow-box">
+                                <span>Step 1</span>
+                                <h3>Studio Master Out</h3>
+                                <p>Route the final stereo bus from your mixer or audio interface into the streaming computer as a clean master feed.</p>
+                            </div>
+                            <div class="flow-box">
+                                <span>Step 2</span>
+                                <h3>OBS Studio</h3>
+                                <p>Use OBS to manage audio levels, add webcams or overlays, monitor latency, and prepare the outgoing stream.</p>
+                            </div>
+                            <div class="flow-box">
+                                <span>Step 3</span>
+                                <h3>Icecast / Radio Caster</h3>
+                                <p>Send the encoded stream to a free Icecast-compatible endpoint. Radio Caster is a lightweight way to push the audio-only feed.</p>
+                            </div>
+                            <div class="flow-box">
+                                <span>Step 4</span>
+                                <h3>Listeners + Archive</h3>
+                                <p>Share the live URL via Radio Boost and later upload polished recordings or full DJ/live sessions to Mixcloud.</p>
+                            </div>
+                        </div>
+
+                        <ul class="lead-list">
+                            <li><strong>Why this stack:</strong> it keeps the live signal under your control and does not depend on a single social network.</li>
+                            <li><strong>Best free core:</strong> OBS Studio + a free Icecast server is the most flexible foundation.</li>
+                            <li><strong>Audio-first fallback:</strong> if you do not need video, Radio Caster + Icecast is simpler than full OBS scene management.</li>
+                            <li><strong>Mixcloud role:</strong> best used for session publishing and discoverability, not as the main real-time studio transport layer.</li>
+                        </ul>
+                    </div>
+
+                    <div class="panel">
+                        <p class="section-label">Suggested Studio Workflow</p>
+                        <h2 class="section-title" style="font-size: clamp(1.8rem, 4vw, 2.4rem);">How I’d Set This Up</h2>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <h3>1. Capture the master bus cleanly</h3>
+                                <p>Use the mixer’s record out, audio interface loopback, or a dedicated stereo pair so the stream hears the exact same master mix as the room monitors.</p>
+                            </div>
+                            <div class="step-card">
+                                <h3>2. Normalize in OBS</h3>
+                                <p>Add the audio input capture, set a limiter to avoid clipping, and optionally add camera scenes, studio branding, and a “live now” slate.</p>
+                            </div>
+                            <div class="step-card">
+                                <h3>3. Stream to Icecast</h3>
+                                <p>Use a free Icecast endpoint as the stable public stream destination. This gives you a simple URL that can be embedded later on the site.</p>
+                            </div>
+                            <div class="step-card">
+                                <h3>4. Promote and archive</h3>
+                                <p>Push the listening link through Radio Boost and upload the best recorded sessions to Mixcloud for replay and audience growth.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tools">
+                    <div class="tools-grid">
+                        <div class="tool-card recommended">
+                            <p class="section-label">Recommended Core</p>
+                            <h3>OBS Studio</h3>
+                            <p>The main technical hub for scenes, meters, audio control, webcams, and stream output.</p>
+                            <ul>
+                                <li>Best all-round control for live studio streaming</li>
+                                <li>Free and widely supported</li>
+                                <li>Ideal if you want both audio and video</li>
+                            </ul>
+                        </div>
+
+                        <div class="tool-card recommended">
+                            <p class="section-label">Recommended Transport</p>
+                            <h3>Icecast.com / Free Icecast Server</h3>
+                            <p>Best destination for a persistent, shareable stream URL when you want audio-first broadcasting.</p>
+                            <ul>
+                                <li>Open streaming standard</li>
+                                <li>Works with many encoders and players</li>
+                                <li>Good base for embedding on the website later</li>
+                            </ul>
+                        </div>
+
+                        <div class="tool-card">
+                            <p class="section-label">Lightweight Encoder</p>
+                            <h3>Radio Caster</h3>
+                            <p>Useful if you want a simpler audio-only sender than OBS.</p>
+                            <ul>
+                                <li>Fast to configure</li>
+                                <li>Good for no-video studio sessions</li>
+                                <li>Can feed Icecast directly</li>
+                            </ul>
+                        </div>
+
+                        <div class="tool-card">
+                            <p class="section-label">Distribution Support</p>
+                            <h3>Radio Boost</h3>
+                            <p>Helpful as a promotion or relay layer, but not the primary studio ingest point.</p>
+                            <ul>
+                                <li>Use it to extend reach</li>
+                                <li>Keep your main source on OBS + Icecast</li>
+                                <li>Useful once the live URL is stable</li>
+                            </ul>
+                        </div>
+
+                        <div class="tool-card">
+                            <p class="section-label">Archive / Replay</p>
+                            <h3>Mixcloud</h3>
+                            <p>Great for publishing recordings and mixes after the live session finishes.</p>
+                            <ul>
+                                <li>Best for discoverability and playback</li>
+                                <li>Less ideal as the core low-latency live backbone</li>
+                                <li>Strong companion to the main stream workflow</li>
+                            </ul>
+                        </div>
+
+                        <div class="stack-note">
+                            <strong>Bottom line:</strong> if the goal is “live stream directly from our music studio master mix” with free tools, I recommend <strong>OBS Studio → Icecast server</strong> as the main path, with <strong>Radio Caster</strong> as the simple audio-only alternative, <strong>Radio Boost</strong> for visibility, and <strong>Mixcloud</strong> for archived sessions.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 <span>Buoys</span>. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 60);
+        });
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => navLinks.classList.remove('open'));
+        });
+    </script>
+
+</body></html>
