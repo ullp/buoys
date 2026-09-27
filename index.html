@@ -108,7 +108,9 @@
             padding: 80px 24px 60px;
         }
         .hero-logo {
-            max-width: 280px;
+            width: min(280px, 70vw);
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
             margin: 0 auto 32px;
             filter: drop-shadow(0 4px 20px rgba(0,0,0,0.6));
         }
@@ -294,7 +296,7 @@
             </div>
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <img src="images/band-logo.jpg" alt="Buoys" class="hero-logo">
+                <img src="images/buoys.jpg" alt="Buoys Logo" class="hero-logo">
                 <h1>Buoys<span>Official</span></h1>
                 <p class="hero-tagline">Live, raw, and independent. For bookings, collaborations, and direct messages, use the contact form below.</p>
                 <div class="hero-buttons">
