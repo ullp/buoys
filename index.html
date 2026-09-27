@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* ===== RESET & BASE ===== */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; overflow-y: scroll; }
         body {
@@ -20,11 +19,9 @@
         }
         a { color: inherit; text-decoration: none; }
         img { max-width: 100%; height: auto; display: block; }
-        ul { list-style: none; }
 
-        /* ===== UTILITY ===== */
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 0 24px;
         }
@@ -49,6 +46,7 @@
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             padding: 14px 32px;
             border-radius: 50px;
@@ -77,66 +75,6 @@
             transform: translateY(-2px);
         }
 
-        /* ===== NAV ===== */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 20px 0;
-            transition: background 0.4s ease, padding 0.4s ease;
-            background: rgba(10,10,10,0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        nav.scrolled {
-            padding: 12px 0;
-        }
-        nav .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .nav-logo {
-            font-weight: 800;
-            font-size: 1.4rem;
-            letter-spacing: 2px;
-        }
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-        .nav-links a {
-            font-size: 0.85rem;
-            font-weight: 500;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #aaa;
-            transition: color 0.3s;
-        }
-        .nav-links a:hover { color: #fff; }
-        .nav-toggle {
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 4px;
-        }
-        .nav-toggle span {
-            display: block;
-            width: 26px;
-            height: 2px;
-            background: #fff;
-            transition: all 0.3s;
-            border-radius: 2px;
-        }
-
-        /* ===== HERO ===== */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -167,7 +105,7 @@
             position: relative;
             z-index: 2;
             text-align: center;
-            padding: 120px 24px 60px;
+            padding: 80px 24px 60px;
         }
         .hero-logo {
             max-width: 280px;
@@ -193,7 +131,7 @@
         .hero-tagline {
             font-size: 1.15rem;
             color: #bbb;
-            max-width: 500px;
+            max-width: 540px;
             margin: 0 auto 40px;
         }
         .hero-buttons {
@@ -202,100 +140,124 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-        .scroll-indicator {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            color: #666;
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            animation: float 2s ease-in-out infinite;
-        }
-        .scroll-indicator .line {
-            width: 1px;
-            height: 40px;
-            background: linear-gradient(to bottom, #666, transparent);
-        }
-        @keyframes float {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(8px); }
-        }
 
-        /* ===== LATEST TRACKS ===== */
-        .latest {
+        .contact-section {
             padding: 120px 0;
             background: #0f0f0f;
         }
-        .latest-header {
+        .contact-header {
             text-align: center;
-            margin-bottom: 60px;
+            margin: 0 auto 48px;
         }
-        .latest-header .section-subtitle {
+        .contact-header .section-subtitle {
             margin: 0 auto;
         }
-        .latest-tracks {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            max-width: 900px;
+        .contact-form-wrapper {
+            max-width: 760px;
             margin: 0 auto;
-        }
-        .track-card {
             background: #141414;
-            border-radius: 14px;
-            padding: 28px;
             border: 1px solid rgba(255,255,255,0.06);
-            transition: transform 0.3s ease, border-color 0.3s ease;
-            text-align: center;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.25);
         }
-        .track-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(255,255,255,0.15);
+        .form-group {
+            margin-bottom: 20px;
         }
-        .track-card .track-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-            margin: 0 auto 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #ccc;
         }
-        .track-card .track-icon svg {
-            width: 24px;
-            height: 24px;
-            color: #888;
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1e1e1e;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+            outline: none;
         }
-        .track-card h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-            line-height: 1.3;
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: rgba(255,255,255,0.3);
         }
-        .track-card .track-meta {
-            font-size: 0.8rem;
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
             color: #666;
+        }
+        .form-group textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-submit {
+            width: 100%;
+            margin-top: 8px;
+            padding: 16px 32px;
+        }
+        .form-success {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+        .form-success.active {
+            display: block;
+        }
+        .form-success svg {
+            width: 64px;
+            height: 64px;
+            color: #1db954;
             margin-bottom: 16px;
         }
-        .track-card .btn {
-            padding: 8px 20px;
-            font-size: 0.8rem;
+        .form-success h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
-
-        .latest-cta {
-            text-align: center;
+        .form-success p {
+            color: #888;
+            margin-bottom: 24px;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
             margin-top: 48px;
         }
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 28px;
+            border-radius: 50px;
+            background: #141414;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .social-link:hover {
+            background: #1e1e1e;
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+        }
+        .social-link svg {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
 
-        /* ===== FOOTER ===== */
         footer {
             padding: 40px 0;
             border-top: 1px solid rgba(255,255,255,0.06);
@@ -305,108 +267,101 @@
         }
         footer span { color: #888; }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .nav-links {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 280px;
-                height: 100vh;
-                background: #111;
-                flex-direction: column;
-                padding: 80px 40px 40px;
-                gap: 24px;
-                transition: right 0.4s ease;
-                border-left: 1px solid rgba(255,255,255,0.06);
-            }
-            .nav-links.open { right: 0; }
-            .nav-toggle { display: flex; }
             .hero h1 { letter-spacing: 4px; }
-            .latest-tracks {
-                grid-template-columns: 1fr;
-                max-width: 400px;
-            }
+            .hero h1 span { letter-spacing: 8px; }
+            .contact-section { padding: 80px 0; }
+            .contact-form-wrapper { padding: 28px; }
+            .form-row { grid-template-columns: 1fr; gap: 0; }
         }
         @media (max-width: 500px) {
             .hero-buttons {
                 flex-direction: column;
                 align-items: center;
             }
+            .btn { width: 100%; max-width: 280px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== NAV ===== -->
-    <nav id="navbar">
-        <div class="container">
-            <a href="#" class="nav-logo">BUOYS</a>
-            <div class="nav-links" id="navLinks">
-                <a href="#home">Home</a>
-                <a href="about.html">About</a>
-                <a href="library.html">Library</a>
-                <a href="gallery.html">Gallery</a>
-                <a href="contact.html">Contact</a>
-                <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.8rem;">Facebook</a>
+    <main>
+        <section class="hero" id="home">
+            <div class="hero-bg">
+                <video autoplay muted loop playsinline poster="images/band-photo-1.jpg">
+                    <source src="tracks/hero-bg-video.mp4" type="video/mp4">
+                </video>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </nav>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <img src="images/band-logo.jpg" alt="Buoys" class="hero-logo">
+                <h1>Buoys<span>Official</span></h1>
+                <p class="hero-tagline">Live, raw, and independent. For bookings, collaborations, and direct messages, use the contact form below.</p>
+                <div class="hero-buttons">
+                    <a href="#contact" class="btn btn-primary">Contact Us</a>
+                    <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" rel="noopener" class="btn btn-outline">Facebook</a>
+                </div>
+            </div>
+        </section>
 
-    <!-- ===== HERO ===== -->
-    <section class="hero" id="home">
-        <div class="hero-bg">
-            <video autoplay muted loop playsinline poster="images/band-photo-1.jpg">
-                <source src="tracks/hero-bg-video.mp4" type="video/mp4">
-            </video>
-        </div>
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <img src="images/buoys.jpg" alt="Buoys Logo" class="hero-logo">
-            <h1>
-                BUOYS
-                <span>Jamming collective</span>
-            </h1>
-            <p class="hero-tagline">Live electronic jamming unit consisting of Anomal Panda, Victor Stracci, DWP and ZEWRICH.
-                We drift like loose buoys on waves.</p>
-            <div class="hero-buttons">
-                <a href="library.html" class="btn btn-primary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Listen
-                </a>
-                <a href="gallery.html" class="btn btn-outline">Gallery</a>
-            </div>
-        </div>
-        <div class="scroll-indicator">
-            <span>Scroll</span>
-            <div class="line"></div>
-        </div>
-    </section>
+        <section class="contact-section" id="contact">
+            <div class="container">
+                <div class="contact-header">
+                    <p class="section-label">Contact</p>
+                    <h2 class="section-title">Get in Touch</h2>
+                    <p class="section-subtitle">Book us for your next event, club night, or collaboration. Fill out the form and we'll respond as soon as possible.</p>
+                </div>
 
-    <!-- ===== LATEST TRACKS ===== -->
-    <section class="latest" id="latest">
-        <div class="container">
-            <div class="latest-header">
-                <p class="section-label">Latest</p>
-                <h2 class="section-title">Our Music</h2>
-                <p class="section-subtitle">Check out our 3 most recent tracks from the library.</p>
-            </div>
-            <div class="latest-tracks" id="latestTracks">
-                <!-- Injected by JS -->
-            </div>
-            <div class="latest-cta">
-                <a href="library.html" class="btn btn-outline">
-                    View Full Library
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                </a>
-            </div>
-        </div>
-    </section>
+                <div class="contact-form-wrapper" id="contactFormWrapper">
+                    <div id="formContainer">
+                        <form id="contactForm" action="https://formsubmit.co/ullmann.web@gmail.com" method="POST">
+                            <input type="hidden" name="_subject" value="New inquiry - buoys.online">
+                            <input type="hidden" name="_template" value="table">
+                            <input type="hidden" name="_next" value="https://buoys.online/?sent=1#contact">
+                            <input type="text" name="_honey" style="display:none">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="formName">Name *</label>
+                                    <input type="text" id="formName" name="name" placeholder="Your name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="formEmail">Email *</label>
+                                    <input type="email" id="formEmail" name="email" placeholder="your@email.com" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="formPhone">Phone (optional)</label>
+                                <input type="tel" id="formPhone" name="phone" placeholder="+420 123 456 789">
+                            </div>
+                            <div class="form-group">
+                                <label for="formMessage">Message *</label>
+                                <textarea id="formMessage" name="message" placeholder="Tell us about your event, venue, or idea…" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="formCaptcha">Anti-spam: <span id="captchaQuestion"></span></label>
+                                <input type="number" id="formCaptcha" name="captcha" placeholder="Enter answer" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary form-submit">Send Message</button>
+                        </form>
+                    </div>
+                    <div class="form-success" id="formSuccess">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <h3>Message Sent!</h3>
+                        <p>Thanks for reaching out. We'll get back to you soon.</p>
+                        <button type="button" class="btn btn-outline" onclick="resetForm()">Send Another Message</button>
+                    </div>
+                </div>
 
-    <!-- ===== FOOTER ===== -->
+                <div class="social-links">
+                    <a href="https://www.facebook.com/profile.php?id=61584378587992" target="_blank" rel="noopener" class="social-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        Facebook
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
     <footer>
         <div class="container">
             <p>&copy; 2026 <span>Buoys</span>. All rights reserved.</p>
@@ -414,26 +369,8 @@
     </footer>
 
     <script>
-        // ===== CONFIGURATION =====
-        const API_BASE_URL = 'https://hgcye8yz18.execute-api.eu-west-1.amazonaws.com/v1/audio';
+        const API_BASE_URL = 'https://jlo7j3l2y2.execute-api.eu-north-1.amazonaws.com/prod/media';
 
-        // Navbar scroll effect
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 60);
-        });
-
-        // Mobile nav toggle
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
-        });
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => navLinks.classList.remove('open'));
-        });
-
-        // ===== FETCH SIGNED URL =====
         async function getSignedUrl(trackId, type = 'preview') {
             const url = `${API_BASE_URL}/${trackId}?type=${type}`;
             const response = await fetch(url);
@@ -444,7 +381,6 @@
             return data.url;
         }
 
-        // ===== HERO VIDEO =====
         (async function initHeroVideo() {
             try {
                 const videoUrl = await getSignedUrl('hero-video', 'rent');
@@ -458,59 +394,46 @@
             }
         })();
 
-        // ===== LATEST TRACKS =====
-        const LATEST_TRACKS = [
-            {
-                id: 'track-1',
-                title: 'Session Dobrichlapci — Track 1',
-                duration: '5:42'
-            },
-            {
-                id: 'track-2',
-                title: 'Session Dobrichlapci — Track 2',
-                duration: '4:18'
-            },
-            {
-                id: 'track-3',
-                title: 'Session Dobrichlapci — Track 3',
-                duration: '5:01'
+        let captchaAnswer = 0;
+        function generateCaptcha() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            const ops = ['+', '-', '×'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            const questionEl = document.getElementById('captchaQuestion');
+            const inputEl = document.getElementById('formCaptcha');
+            if (op === '+') captchaAnswer = a + b;
+            else if (op === '-') captchaAnswer = a - b;
+            else captchaAnswer = a * b;
+            questionEl.textContent = `${a} ${op} ${b} = ?`;
+            inputEl.value = '';
+        }
+        generateCaptcha();
+
+        const contactForm = document.getElementById('contactForm');
+        contactForm.addEventListener('submit', function(e) {
+            const userAnswer = parseInt(document.getElementById('formCaptcha').value, 10);
+            if (isNaN(userAnswer) || userAnswer !== captchaAnswer) {
+                e.preventDefault();
+                alert('Incorrect answer. Please solve the math problem correctly.');
+                generateCaptcha();
+                document.getElementById('formCaptcha').focus();
             }
-        ];
+        });
 
-        const latestContainer = document.getElementById('latestTracks');
+        if (window.location.search.includes('sent=1')) {
+            document.getElementById('formContainer').style.display = 'none';
+            document.getElementById('formSuccess').classList.add('active');
+            document.getElementById('contact').scrollIntoView();
+        }
 
-        // Render track cards with placeholder audio elements
-        latestContainer.innerHTML = LATEST_TRACKS.map(track => `
-            <div class="track-card" data-track-id="${track.id}">
-                <div class="track-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                </div>
-                <h3>${track.title}</h3>
-                <div class="track-meta">${track.duration}</div>
-                <audio controls preload="none" style="width: 100%; border-radius: 8px;">
-                    <source src="" type="audio/mpeg">
-                </audio>
-            </div>
-        `).join('');
-
-        // Load signed URLs for each track's audio element
-        (async function loadTrackUrls() {
-            for (const track of LATEST_TRACKS) {
-                try {
-                    const signedUrl = await getSignedUrl(track.id, 'preview');
-                    const card = document.querySelector(`.track-card[data-track-id="${track.id}"]`);
-                    if (card) {
-                        const source = card.querySelector('audio source');
-                        if (source) {
-                            source.src = signedUrl;
-                            card.querySelector('audio').load();
-                        }
-                    }
-                } catch (err) {
-                    console.warn(`Could not load URL for ${track.id}:`, err);
-                }
-            }
-        })();
+        function resetForm() {
+            contactForm.reset();
+            generateCaptcha();
+            document.getElementById('formContainer').style.display = 'block';
+            document.getElementById('formSuccess').classList.remove('active');
+            window.history.replaceState({}, document.title, 'https://buoys.online/');
+        }
     </script>
 </body>
 </html>
